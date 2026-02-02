@@ -78,14 +78,15 @@ class CLEVRCurriculumViltDataset(Dataset):
 
         self.samples: List[Dict[str, Any]] = []
 
-        if split == "train":
-            if answer2id is None:
-                raise ValueError("answer2id is required for split='train'")
+        use_tiers = (split in {"train", "val"}) and (tiers is not None)
+
+        if use_tiers:
+            # For tiered val/train, default tiers if not provided (optional)
             if tiers is None:
                 tiers = [1, 2, 3, 4, 5]
 
             for t in tiers:
-                qpath = os.path.join(questions_dir, f"CLEVR_train_questions_L{t}.json")
+                qpath = os.path.join(questions_dir, f"CLEVR_{split}_questions_L{t}.json")
                 if not os.path.exists(qpath):
                     raise FileNotFoundError(f"Tier file not found: {qpath}")
 
@@ -93,7 +94,7 @@ class CLEVRCurriculumViltDataset(Dataset):
                     self.samples.append(
                         {
                             "question": q["question"],
-                            "answer": q.get("answer"),
+                            "answer": q.get("answer"),  # train/val should have answers
                             "image_filename": q["image_filename"],
                             "question_index": q.get("question_index", -1),
                             "tier": t,
