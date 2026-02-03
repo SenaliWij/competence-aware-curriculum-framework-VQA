@@ -7,13 +7,16 @@ Original file is located at
     https://colab.research.google.com/drive/1bx9PAv6wVrnmKnXRzoT1RDUTr-dRF3R8
 """
 
+from google.colab import drive
+drive.mount('/content/drive')
+
 import torch
 import torch.nn as nn
 from transformers import ViltForQuestionAnswering
-# from .adapter import ModelAdapter
+from base_model import ModelAdapter
 from typing import Dict, Any
 
-class ViLTAdapter():
+class ViLTAdapter(ModelAdapter):
     def __init__(self, model_name: str = "dandelin/vilt-b32-mlm-itm", num_labels: int = 28, learning_rate: float = 5e-5, device: str = 'cuda'):
         self.device = torch.device(device if torch.cuda.is_available() else 'cpu')
 
@@ -90,3 +93,4 @@ class ViLTAdapter():
 
     def load_optimizer_state(self, state_dict):
         self.optimizer.load_state_dict(state_dict)
+

@@ -7,8 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1sjI_7Vgh4Gmr40chNR2_srtD4-jyRXAl
 """
 
-
-
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 import torch
