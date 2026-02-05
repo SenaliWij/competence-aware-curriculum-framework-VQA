@@ -17,117 +17,120 @@ Original file is located at
 # !pip install -q tqdm  # For progress bars during training
 # !pip install -q wandb  # For experiment tracking (optional)
 
-from google.colab import drive
-drive.mount('/content/drive')
+# from google.colab import drive
+# drive.mount('/content/drive')
 
 """### **1. ENCODING IMAGES AND QUESTIONS USING ViLT PROCESSOR**"""
 
-import os
+import io
 import json
 from typing import Dict, List, Optional, Any
 
+import boto3
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from PIL import Image
 from transformers import ViltProcessor
+
+
 
 """Utils functions
 
 """
 
-def load_questions(path: str) -> List[Dict[str, Any]]:
-    with open(path, "r") as f:
-        return json.load(f)["questions"]
+class S3Client:
+    def __init__(self, bucket: str):
+        self.bucket = bucket
+        self.client = boto3.client("s3")
 
+    def load_json(self, key: str) -> Any:
+        obj = self.client.get_object(Bucket=self.bucket, Key=key)
+        return json.loads(obj["Body"].read().decode("utf-8"))
 
-def build_answer_vocab(paths: List[str]) -> Dict[str, int]:
+    def load_image(self, key: str) -> Image.Image:
+        obj = self.client.get_object(Bucket=self.bucket, Key=key)
+        return Image.open(io.BytesIO(obj["Body"].read())).convert("RGB")
+
+def build_answer_vocab_s3(
+    s3: S3Client,
+    question_keys: List[str]
+) -> Dict[str, int]:
     answers = set()
-    for p in paths:
-        data = load_questions(p)
+    for key in question_keys:
+        data = s3.load_json(key)["questions"]
         for q in data:
             if "answer" in q:
                 answers.add(str(q["answer"]).strip().lower())
     answers = sorted(answers)
     return {a: i for i, a in enumerate(answers)}
 
-"""Dataset class (loads image + question and encodes using ViLT)"""
 
-class CLEVRCurriculumViltDataset(Dataset):
+"""Dataset class (loads image + question and encodes using ViLT)"""
+class CLEVRCurriculumViltDatasetS3(Dataset):
     def __init__(
         self,
-        questions_dir: str,
-        images_dir: str,
+        bucket: str,
+        images_prefix: str,        # "image"
+        questions_prefix: str,     # "questions"
         processor: ViltProcessor,
         split: str,
         answer2id: Optional[Dict[str, int]] = None,
-        tiers: Optional[List[int]] = None,     # only used for train
+        tiers: Optional[List[int]] = None,
         max_length: int = 32,
     ):
         assert split in {"train", "val", "test"}
-        self.questions_dir = questions_dir
-        self.images_dir = images_dir
+
+        self.s3 = S3Client(bucket)
+        self.images_prefix = images_prefix
+        self.questions_prefix = questions_prefix
         self.processor = processor
         self.split = split
         self.answer2id = answer2id
         self.max_length = max_length
 
-        # sanity: ensure split image folder exists
-        self.split_img_dir = os.path.join(images_dir, split if split != "val" else "val")
-        if not os.path.isdir(self.split_img_dir):
-            raise FileNotFoundError(f"Image folder not found in Colab FS: {self.split_img_dir}")
-
         self.samples: List[Dict[str, Any]] = []
 
-        use_tiers = (split in {"train", "val"}) and (tiers is not None)
-
-        if use_tiers:
-            # For tiered val/train, default tiers if not provided (optional)
-            if tiers is None:
-                tiers = [1, 2, 3, 4, 5]
-
+        # ---------- LOAD QUESTIONS (FROM S3) ----------
+        if split in {"train", "val"} and tiers is not None:
             for t in tiers:
-                qpath = os.path.join(questions_dir, f"CLEVR_{split}_questions_L{t}.json")
-                if not os.path.exists(qpath):
-                    raise FileNotFoundError(f"Tier file not found: {qpath}")
+                qkey = f"{questions_prefix}/CLEVR_{split}_questions_L{t}.json"
+                questions = self.s3.load_json(qkey)["questions"]
 
-                for q in load_questions(qpath):
-                    self.samples.append(
-                        {
-                            "question": q["question"],
-                            "answer": q.get("answer"),  # train/val should have answers
-                            "image_filename": q["image_filename"],
-                            "question_index": q.get("question_index", -1),
-                            "tier": t,
-                        }
-                    )
-        else:
-            qfile = f"CLEVR_{split}_questions.json"
-            qpath = os.path.join(questions_dir, qfile)
-            if not os.path.exists(qpath):
-                raise FileNotFoundError(f"{split} questions file not found: {qpath}")
-
-            for q in load_questions(qpath):
-                self.samples.append(
-                    {
+                for q in questions:
+                    self.samples.append({
                         "question": q["question"],
-                        "answer": q.get("answer"),  # val has answers; test may not
+                        "answer": q.get("answer"),
                         "image_filename": q["image_filename"],
                         "question_index": q.get("question_index", -1),
-                        "tier": -1,
-                    }
-                )
+                        "tier": t,
+                    })
+        else:
+            qkey = f"{questions_prefix}/CLEVR_{split}_questions.json"
+            questions = self.s3.load_json(qkey)["questions"]
 
-    def __len__(self) -> int:
+            for q in questions:
+                self.samples.append({
+                    "question": q["question"],
+                    "answer": q.get("answer"),
+                    "image_filename": q["image_filename"],
+                    "question_index": q.get("question_index", -1),
+                    "tier": -1,
+                })
+
+
+    def __len__(self):
         return len(self.samples)
 
     def __getitem__(self, idx: int) -> Dict[str, Any]:
         s = self.samples[idx]
-        img_path = os.path.join(self.split_img_dir, s["image_filename"])
 
-        if not os.path.exists(img_path):
-            raise FileNotFoundError(f"Image not found: {img_path}")
+        image_key = (
+            f"{self.images_prefix}/"
+            f"{self.split if self.split != 'val' else 'val'}/"
+            f"{s['image_filename']}"
+        )
 
-        image = Image.open(img_path).convert("RGB")
+        image = self.s3.load_image(image_key)
 
         enc = self.processor(
             images=image,
@@ -137,9 +140,9 @@ class CLEVRCurriculumViltDataset(Dataset):
             truncation=True,
             max_length=self.max_length,
         )
+
         item = {k: v.squeeze(0) for k, v in enc.items()}
 
-        # labels if available
         if s.get("answer") is not None and self.answer2id is not None:
             key = str(s["answer"]).strip().lower()
             item["labels"] = torch.tensor(self.answer2id[key], dtype=torch.long)
@@ -147,6 +150,7 @@ class CLEVRCurriculumViltDataset(Dataset):
         item["tier"] = torch.tensor(s["tier"], dtype=torch.long)
         item["question_id"] = torch.tensor(s["question_index"], dtype=torch.long)
         return item
+
 
 
 def vilt_collate_fn(batch: List[Dict[str, Any]]) -> Dict[str, torch.Tensor]:

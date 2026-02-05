@@ -13,58 +13,81 @@ drive.mount('/content/drive')
 from typing import Dict
 from evaluation_service import EvaluationService
 
+from typing import Dict, Any
+from evaluation_service import EvaluationService
+
 class CurriculumManager:
     """
-    Decides when to advance to the next tier based on competence metrics.
+    Manages progression through CLEVR-based reasoning tiers with 
+    tier-specific performance thresholds and learning rates.
     """
     def __init__(
         self,
         max_tiers: int = 5,
-        accuracy_threshold: float = 0.85,
-        loss_stability_threshold: float = 1e-3,
-        window_size: int = 5
+        window_size: int = 5,
+        loss_stability_threshold: float = 1e-3
     ):
         self.max_tiers = max_tiers
         self.current_tier = 1
-        self.accuracy_threshold = accuracy_threshold
-        self.loss_stability_threshold = loss_stability_threshold
         self.window_size = window_size
+        self.loss_stability_threshold = loss_stability_threshold
         self.is_completed = False
+
+        # Tier-specific configurations
+        # Logic: Earlier tiers need higher accuracy to ensure a solid foundation.
+        # Later tiers are harder, so we lower the threshold slightly and reduce LR 
+        # to prevent catastrophic forgetting of simpler concepts.
+        self.tier_configs = {
+            1: {"name": "Attribute & Existence", "threshold": 0.72, "lr": 1e-3},
+            2: {"name": "Counting / Compare Int", "threshold": 0.70, "lr": 8e-4},
+            3: {"name": "Compare Attribute",      "threshold": 0.68, "lr": 5e-4},
+            4: {"name": "Relational Tasks",       "threshold": 0.65, "lr": 2e-4},
+            5: {"name": "Complex Composition",    "threshold": 0.62, "lr": 1e-4}
+        }
+
+    def get_current_lr(self) -> float:
+        """Returns the learning rate intended for the current tier."""
+        return self.tier_configs[self.current_tier]["lr"]
 
     def should_advance(self, evaluation_service: EvaluationService) -> bool:
         """
-        Determines if the model should advance to the next tier.
-        Rule: Moving Avg Acc >= Threshold AND Loss is Stable.
+        Determines if the model should advance based on tier-specific thresholds.
         """
-        if self.current_tier >= self.max_tiers:
-            self.is_completed = True
+        if self.is_completed:
             return False
 
+        config = self.tier_configs[self.current_tier]
         avg_acc = evaluation_service.get_moving_average_accuracy(self.window_size)
         stable = evaluation_service.is_loss_stable(self.loss_stability_threshold, self.window_size)
 
-        print(f"Tier {self.current_tier} Status: MovingAvg Accuracy={avg_acc:.4f} (Threshold: {self.accuracy_threshold}), Loss Stable={stable}")
+        print(f"\n--- Tier {self.current_tier} [{config['name']}] Status ---")
+        print(f"MovingAvg Acc: {avg_acc:.4f} (Target: {config['threshold']})")
+        print(f"Loss Stable: {stable}")
 
-        if avg_acc >= self.accuracy_threshold and stable:
+        if avg_acc >= config["threshold"] and stable:
             return True
         return False
 
     def advance_tier(self):
+        """Increments the tier level and updates training state."""
         if self.current_tier < self.max_tiers:
             self.current_tier += 1
-            print(f"*** PROMOTION! Advancing to Tier {self.current_tier} ***")
+            new_config = self.tier_configs[self.current_tier]
+            print(f"\n🚀 PROMOTION! Moving to Tier {self.current_tier}: {new_config['name']}")
+            print(f"Adjusting Learning Rate to: {new_config['lr']}")
         else:
             self.is_completed = True
-            print("*** Curriculum Completed! ***")
+            print("\n🎉 Curriculum Completed! All tiers mastered.")
 
-    def get_config_state(self) -> Dict:
+    def get_config_state(self) -> Dict[str, Any]:
         """Returns state for checkpointing."""
         return {
             'current_tier': self.current_tier,
-            'is_completed': self.is_completed
+            'is_completed': self.is_completed,
+            'current_lr': self.get_current_lr()
         }
 
-    def load_config_state(self, state: Dict):
+    def load_config_state(self, state: Dict[str, Any]):
         """Restores state from checkpoint."""
         self.current_tier = state.get('current_tier', 1)
         self.is_completed = state.get('is_completed', False)
