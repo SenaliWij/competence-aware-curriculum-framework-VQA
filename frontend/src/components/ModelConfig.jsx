@@ -18,9 +18,9 @@ const ModelConfig = () => {
     });
 
     const models = [
-        { id: 'vilt', name: 'ViLT Model', desc: 'Optimized for visual-language tasks with efficient training.', color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)' },
-        { id: 'lxmert', name: 'LXMERT Model', desc: 'Combines visual and textual information for enhanced reasoning.', color: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)' },
-        { id: 'albef', name: 'ALBEF Model', desc: 'Aligns image and text features for robust understanding.', color: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)' },
+        { id: 'vilt', name: 'ViLT Model', desc: 'Optimized for visual-language tasks with efficient training.', color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)', locked: false },
+        { id: 'lxmert', name: 'LXMERT Model', desc: 'Combines visual and textual information for enhanced reasoning.', color: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)' , locked: true},
+        { id: 'albef', name: 'ALBEF Model', desc: 'Aligns image and text features for robust understanding.', color: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)', locked: true },
     ];
 
     const handleStartTraining = async () => {
@@ -77,9 +77,6 @@ const ModelConfig = () => {
                         <Form layout="vertical">
                             <Form.Item label="Batch Size">
                                 <InputNumber className="w-full" value={config.batch_size} onChange={v => setConfig({ ...config, batch_size: v })} />
-                            </Form.Item>
-                            <Form.Item label="Epochs">
-                                <InputNumber className="w-full" value={config.epochs} onChange={v => setConfig({ ...config, epochs: v })} />
                             </Form.Item>
                             <Form.Item label="Curriculum Learning">
                                 <Switch checked={config.use_curriculum} onChange={v => setConfig({ ...config, use_curriculum: v })} />

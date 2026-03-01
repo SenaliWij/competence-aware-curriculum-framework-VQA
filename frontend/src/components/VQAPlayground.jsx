@@ -57,9 +57,10 @@ const VQAPlayground = () => {
                         </Dragger>
 
                         <div className="mt-40">
-                            <Title level={4}>Your Question</Title>
+                            <Title  level={4} >Your Question</Title>
                             <TextArea
                                 rows={4}
+                                style={{ fontSize: '16px' } }
                                 value={question}
                                 onChange={e => setQuestion(e.target.value)}
                                 placeholder="e.g., Is the cat sitting on a striped rug?"
@@ -85,7 +86,7 @@ const VQAPlayground = () => {
                                 <Title level={4}>Model Answer</Title>
                                 <Title level={2} style={{ color: '#00e5ff', margin: '10px 0' }}>{result.answer}.</Title>
                                 <div className="flex-between-center">
-                                    <Text>Confidence: {Math.round(result.confidence * 100)}%</Text>
+                                    <Text style={{ fontSize: '18px' }}> Confidence: {Math.round(result.confidence * 100)}%</Text>
                                     <Tag color="cyan">ViLT Model</Tag>
                                 </div>
                             </Card>
@@ -97,24 +98,25 @@ const VQAPlayground = () => {
                                     renderItem={item => (
                                         <List.Item>
                                             <div className="w-full">
-                                                <div className="flex-between-center mb-20" style={{ marginBottom: '5px' }}>
-                                                    <Text>{item.text}</Text>
-                                                    <Text>{Math.round(item.confidence * 100)}%</Text>
-                                                </div>
-                                                <Progress percent={Math.round(item.confidence * 100)} showInfo={false} strokeColor="#333" trailColor="#111" />
-                                            </div>
-                                        </List.Item>
-                                    )}
-                                />
-                            </Card>
+                                                <div
+                                                    className="flex-between-center"
+                                                    style={{
+                                                        marginBottom: '8px',
+                                                        fontSize: '16px',          // Increased font size
+                                                        fontWeight: 500,
+                                                        letterSpacing: '0.5px'
+                                                    }}
+                                                >
+                                                    <Text style={{ fontSize: '20px' }}>
+                                                        {item.text}
+                                                    </Text>
 
-                            <Card className="glass-panel">
-                                <Title level={4}>Reasoning Trace</Title>
-                                <List
-                                    dataSource={result.reasoning_trace}
-                                    renderItem={item => (
-                                        <List.Item>
-                                            <Text className="text-secondary">&gt; {item}</Text>
+                                                    <Text style={{ fontSize: '20px', marginLeft: '20px' }}>
+                                                        {Math.round(item.confidence * 100)}%
+                                                    </Text>
+                                                </div>
+                                                                                                <Progress percent={Math.round(item.confidence * 100)} showInfo={false} strokeColor="#333" trailColor="#111" />
+                                            </div>
                                         </List.Item>
                                     )}
                                 />

@@ -11,7 +11,7 @@
 }
 
 body {
-  margin: 0% 7%;
+  margin: 0% 8%;
   font-family: 'Outfit', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-primary);
@@ -115,7 +115,7 @@ body {
 }
 
 .flex-between-center {
-  display: flex;
+  /* display: flex; */
   justify-content: space-between;
   align-items: center;
 }
@@ -314,4 +314,12 @@ body {
 
 .text-white {
   color: #fff;
+}
+.metrics-sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.mb-24 {
+  margin-bottom: 24px;
 }

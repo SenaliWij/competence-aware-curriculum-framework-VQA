@@ -7,20 +7,20 @@ Original file is located at
     https://colab.research.google.com/drive/1vzjh5HmGwROdEV3vjGXUNHzo2GySCP07
 """
 
-# Commented out IPython magic to ensure Python compatibility.
-# %%time
-# 
-# # Core dependencies
-# !pip install -q transformers torch torchvision pillow
-# 
-# # Optional but recommended
-# !pip install -q tqdm  # For progress bars during training
-# !pip install -q wandb  # For experiment tracking (optional)
+"""
+Encoding Process Overview
 
-# from google.colab import drive
-# drive.mount('/content/drive')
+    1. Build answer vocabulary from training question files.
+    2. Create dataset using S3-backed CLEVR dataset.
+    3. Wrap dataset in DataLoader using custom collate function.
+    4. Iterate through DataLoader to generate encoded batches.
+    5. Optionally save encoded batches to disk (.pt files) for faster reuse.
 
-"""### **1. ENCODING IMAGES AND QUESTIONS USING ViLT PROCESSOR**"""
+    This pipeline allows:
+    - Direct S3 streaming (no full local download needed)
+    - Curriculum tier filtering
+    - Seamless integration with ViLT model
+"""
 
 import io
 import json
@@ -34,9 +34,7 @@ from transformers import ViltProcessor
 
 
 
-"""Utils functions
-
-"""
+"""Utils functions"""
 
 class S3Client:
     def __init__(self, bucket: str):
@@ -55,6 +53,13 @@ def build_answer_vocab_s3(
     s3: S3Client,
     question_keys: List[str]
 ) -> Dict[str, int]:
+
+    """
+    Builds an answer vocabulary from multiple question JSON files stored in S3.
+
+    Returns:
+        Dictionary mapping answer string -> integer ID
+    """
     answers = set()
     for key in question_keys:
         data = s3.load_json(key)["questions"]
@@ -67,11 +72,22 @@ def build_answer_vocab_s3(
 
 """Dataset class (loads image + question and encodes using ViLT)"""
 class CLEVRCurriculumViltDatasetS3(Dataset):
+
+    """
+    PyTorch Dataset for CLEVR VQA using curriculum tiers.
+
+    - Loads question JSON files from S3
+    - Loads images from S3
+    - Encodes image + question using ViLTProcessor
+    - Converts answers to label IDs 
+
+    Supports curriculum learning by allowing tier filtering.
+    """
     def __init__(
         self,
         bucket: str,
-        images_prefix: str,        # "image"
-        questions_prefix: str,     # "questions"
+        images_prefix: str,      
+        questions_prefix: str,    
         processor: ViltProcessor,
         split: str,
         answer2id: Optional[Dict[str, int]] = None,
@@ -80,7 +96,9 @@ class CLEVRCurriculumViltDatasetS3(Dataset):
     ):
         assert split in {"train", "val", "test"}
 
+        # Initialize S3 client
         self.s3 = S3Client(bucket)
+
         self.images_prefix = images_prefix
         self.questions_prefix = questions_prefix
         self.processor = processor
@@ -90,10 +108,12 @@ class CLEVRCurriculumViltDatasetS3(Dataset):
 
         self.samples: List[Dict[str, Any]] = []
 
-        # ---------- LOAD QUESTIONS (FROM S3) ----------
+        # LOAD QUESTIONS (FROM S3)
         if split in {"train", "val"} and tiers is not None:
             for t in tiers:
+                # Construct S3 key for tier-specific question file
                 qkey = f"{questions_prefix}/CLEVR_{split}_questions_L{t}.json"
+
                 questions = self.s3.load_json(qkey)["questions"]
 
                 for q in questions:
@@ -119,11 +139,22 @@ class CLEVRCurriculumViltDatasetS3(Dataset):
 
 
     def __len__(self):
+        """
+        Returns total number of samples in dataset.
+        """
         return len(self.samples)
 
     def __getitem__(self, idx: int) -> Dict[str, Any]:
+        """
+        Loads one sample:
+        - Downloads image from S3
+        - Encodes image + question using ViLTProcessor
+        - Converts answer to label ID (if available)
+        """
+
         s = self.samples[idx]
 
+         # Construct S3 key for image
         image_key = (
             f"{self.images_prefix}/"
             f"{self.split if self.split != 'val' else 'val'}/"
@@ -132,6 +163,8 @@ class CLEVRCurriculumViltDatasetS3(Dataset):
 
         image = self.s3.load_image(image_key)
 
+        # Encode using ViLTProcessor
+        # This converts image + text into tensors
         enc = self.processor(
             images=image,
             text=s["question"],
@@ -141,8 +174,10 @@ class CLEVRCurriculumViltDatasetS3(Dataset):
             max_length=self.max_length,
         )
 
+        # Remove batch dimension (processor returns batch size 1)
         item = {k: v.squeeze(0) for k, v in enc.items()}
 
+        # If training/validation and answer mapping exists
         if s.get("answer") is not None and self.answer2id is not None:
             key = str(s["answer"]).strip().lower()
             item["labels"] = torch.tensor(self.answer2id[key], dtype=torch.long)
@@ -154,6 +189,15 @@ class CLEVRCurriculumViltDatasetS3(Dataset):
 
 
 def vilt_collate_fn(batch: List[Dict[str, Any]]) -> Dict[str, torch.Tensor]:
+
+    """
+    Custom collate function for DataLoader.
+
+    - Stacks tensors across the batch dimension
+    - Handles optional 'labels' key separately
+
+    Required because our dataset returns dictionaries.
+    """
     out: Dict[str, torch.Tensor] = {}
     for k in batch[0].keys():
         if k == "labels":
@@ -163,52 +207,7 @@ def vilt_collate_fn(batch: List[Dict[str, Any]]) -> Dict[str, torch.Tensor]:
         out["labels"] = torch.stack([b["labels"] for b in batch])
     return out
 
-"""Encoding process(Build answer vocab + Create dataset + dataloader +  Save encoded batch (.pt))"""
-
-# # Configuration (paths + processor)
-# QUESTIONS_DIR = "/content/drive/MyDrive/Colab Notebooks/FYP/dataset/clevr_kaggle/CLEVR_v1.0/questions"
-# IMAGES_DIR    = "/content/drive/MyDrive/Colab Notebooks/FYP/dataset/clevr_kaggle/CLEVR_v1.0/images"
-
-# processor = ViltProcessor.from_pretrained("dandelin/vilt-b32-mlm")
-
-# # Build answer vocab (from all train tiers)
-# tier_paths = [os.path.join(QUESTIONS_DIR, f"CLEVR_train_questions_L{i}.json") for i in [1,2,3,4,5]]
-# answer2id = build_answer_vocab(tier_paths)
-# print("Answer vocab size:", len(answer2id))
-
-# # Create dataset + dataloader (Tier 1 only)
-
-# train_ds_L1 = CLEVRCurriculumViltDataset(
-#     questions_dir=QUESTIONS_DIR,
-#     images_dir=IMAGES_DIR,
-#     processor=processor,
-#     split="train",
-#     tiers=[1],
-#     answer2id=answer2id,
-#     max_length=32,
-# )
-
-# train_loader_L1 = DataLoader(
-#     train_ds_L1,
-#     batch_size=16,
-#     shuffle=True,
-#     num_workers=0,  # keep 0 while using Google Drive
-#     collate_fn=vilt_collate_fn,
-# )
 
 
-# # Sanity check (get one batch + print shapes)
 
-# batch = next(iter(train_loader_L1))
-# for k, v in batch.items():
-#     print(k, v.shape, v.dtype)
-
-# # Save encoded batch (.pt)
-
-# OUT_DIR = "/content/drive/MyDrive/Colab Notebooks/FYP/encode_output"
-# os.makedirs(OUT_DIR, exist_ok=True)
-
-# batch_path = os.path.join(OUT_DIR, "sanity_batch_L1.pt")
-# torch.save(batch, batch_path)
-# print("Saved:", batch_path)
 

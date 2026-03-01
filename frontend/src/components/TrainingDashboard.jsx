@@ -40,75 +40,147 @@ const TrainingDashboard = () => {
     const COLORS = ['#00e5ff', '#333'];
 
     return (
-        <div className="dashboard-container">
+    <div className="dashboard-container">
+        <Row gutter={40} align="top">
+        
+        {/* LEFT: Training Panel */}
+        <Col span={14}>
             <div className="glass-panel dashboard-header-panel">
-                <Title level={2}>{data.is_training ? 'Training Live' : 'Training Completed'}</Title>
-                <Text className="text-secondary" style={{ display: 'block', marginBottom: '40px' }}>{data.status_message}</Text>
+            <Title level={2}>
+                {data.is_training ? 'Training ' : 'Training '}
+            </Title>
 
-                <div className="chart-container-wrapper">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={progressData}
-                                innerRadius={80}
-                                outerRadius={100}
-                                startAngle={90}
-                                endAngle={-270}
-                                dataKey="value"
-                                stroke="none"
-                            >
-                                {progressData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                            </Pie>
-                        </PieChart>
-                    </ResponsiveContainer>
-                    <div className="chart-center-label">
-                        <Title level={3} style={{ margin: 0, color: '#00e5ff' }}>{data.metrics.accuracy}%</Title>
-                        <Text style={{ fontSize: '12px' }}>Accuracy</Text>
-                    </div>
+            <Text className="text-secondary" style={{ display: 'block', marginBottom: '40px' }}>
+                {data.status_message}
+            </Text>
+
+            {/* Accuracy Ring */}
+            <div className="chart-container-wrapper">
+                <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                    <Pie
+                    data={progressData}
+                    innerRadius={80}
+                    outerRadius={100}
+                    startAngle={90}
+                    endAngle={-270}
+                    dataKey="value"
+                    stroke="none"
+                    >
+                    {progressData.map((_, index) => (
+                        <Cell key={index} fill={COLORS[index]} />
+                    ))}
+                    </Pie>
+                </PieChart>
+                </ResponsiveContainer>
+
+                <div className="chart-center-label">
+                <Title level={3} style={{ margin: 0, color: '#00e5ff' }}>
+                    {data.metrics.accuracy}%
+                </Title>
+                <Text style={{ fontSize: '12px' }}>Progress</Text>
                 </div>
-
-                <Row className="mt-40" gutter={24}>
-                    <Col span={8}>
-                        <Statistic title="Epoch" value={data.metrics.epoch} valueStyle={{ color: '#fff' }} />
-                    </Col>
-                    <Col span={8}>
-                        <Statistic title="Global Step" value={data.metrics.global_step} valueStyle={{ color: '#fff' }} />
-                    </Col>
-                    <Col span={8}>
-                        <Statistic title="Loss" value={data.metrics.loss} precision={4} valueStyle={{ color: '#ff4d4f' }} />
-                    </Col>
-                </Row>
             </div>
 
-            <div className="flex-center-gap">
-                <Button size="large" icon={<PauseCircleOutlined />}>Pause Training</Button>
-                <Button size="large" danger type="primary" icon={<StopOutlined />} onClick={handleStop}>Stop Training</Button>
-            </div>
-
-            <Row gutter={[24, 24]} className="mt-40">
-                <Col span={8}>
-                    <Card className="glass-panel">
-                        <Statistic title="Compositional Reasoning" value={88.5} precision={1} suffix="%" valueStyle={{ color: '#00e5ff' }} prefix={<RiseOutlined />} />
-                        <Text type="secondary">2.1% higher than previous epoch</Text>
-                    </Card>
+            {/* Core stats */}
+            <Row className="mt-40" gutter={24}>
+                <Col span={12}>
+                {/* <Statistic
+                    title="Global Step"
+                    value={data.metrics.global_step}
+                    valueStyle={{ color: '#fff' }}
+                /> */}
                 </Col>
-                <Col span={8}>
-                    <Card className="glass-panel">
-                        <Statistic title="Overall VQA Accuracy" value={data.metrics.accuracy} precision={1} suffix="%" valueStyle={{ color: '#00e5ff' }} />
-                        <Text type="secondary">Trending upwards</Text>
-                    </Card>
-                </Col>
-                <Col span={8}>
-                    <Card className="glass-panel">
-                        <Statistic title="Model Robustness" value={0.92} precision={2} valueStyle={{ color: '#00e5ff' }} />
-                        <Text type="secondary">Stable across tiers</Text>
-                    </Card>
+                <Col span={12}>
+                {/* <Statistic
+                    title="Loss"
+                    value={data.metrics.loss}
+                    precision={4}
+                    valueStyle={{ color: '#ff4d4f' }}
+                /> */}
                 </Col>
             </Row>
-        </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex-center-gap mt-24">
+            <Button size="large" icon={<PauseCircleOutlined />}>
+                Pause Training
+            </Button>
+            <Button
+                size="large"
+                danger
+                type="primary"
+                icon={<StopOutlined />}
+                onClick={handleStop}
+            >
+                Stop Training
+            </Button>
+            </div>
+        </Col>
+
+        {/* RIGHT: Metrics Sidebar */}
+        <Col span={10}>
+            <div className="metrics-sidebar">
+
+                <Card className="glass-panel mb-24">
+                    <Statistic
+                        title="Tier 1 Accuracy"
+                        value={82.9}
+                        precision={1}
+                        suffix="%"
+                        valueStyle={{ color: '#00e5ff' }}
+                    />
+                </Card>
+
+                <Card className="glass-panel mb-24">
+                    <Statistic
+                        title="Tier 2 Accuracy"
+                        value={data.metrics.tier_accuracy?.tier2}
+                        precision={1}
+                        suffix="%"
+                        valueStyle={{ color: '#00e5ff' }}
+                    />
+                </Card>
+
+                <Card className="glass-panel mb-24">
+                    <Statistic
+                        title="Tier 3 Accuracy"
+                        value={data.metrics.tier_accuracy?.tier3}
+                        precision={1}
+                        suffix="%"
+                        valueStyle={{ color: '#00e5ff' }}
+                    />
+                </Card>
+
+                <Card className="glass-panel mb-24">
+                    <Statistic
+                        title="Tier 4 Accuracy"
+                        value={data.metrics.tier_accuracy?.tier4}
+                        precision={1}
+                        suffix="%"
+                        valueStyle={{ color: '#00e5ff' }}
+                    />
+                </Card>
+
+                <Card className="glass-panel">
+                    <Statistic
+                        title="Tier 5 Accuracy"
+                        value={data.metrics.tier_accuracy?.tier5}
+                        precision={1}
+                        suffix="%"
+                        valueStyle={{ color: '#00e5ff' }}
+                    />
+                </Card>
+
+            </div>
+
+        </Col>
+
+        </Row>
+    </div>
     );
+
 };
 
 export default TrainingDashboard;

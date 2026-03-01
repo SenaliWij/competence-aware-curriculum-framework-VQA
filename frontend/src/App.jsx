@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Layout, Menu, Button } from 'antd';
 import { HomeOutlined, SettingOutlined, BarChartOutlined, ExperimentOutlined } from '@ant-design/icons';
-import Home from './pages/Home';
-import ModelConfig from './pages/ModelConfig';
-import TrainingDashboard from './pages/TrainingDashboard';
-import VQAPlayground from './pages/VQAPlayground';
+import Home from './components/Home';
+import ModelConfig from './components/ModelConfig';
+import TrainingDashboard from './components/TrainingDashboard';
+import VQAPlayground from './components/VQAPlayground';
 
 const { Header, Content, Footer } = Layout;
 
@@ -39,7 +39,7 @@ function App() {
         <Router>
             <Layout style={{ minHeight: '100vh', background: 'transparent' }}>
                 <Navbar />
-                <Content style={{ padding: '0', display: 'flex', flexDirection: 'column' }}>
+                <Content style={{ padding: '0'}}>
                     <Routes>
                         <Route path="/" element={<Home />} />
                         <Route path="/config" element={<ModelConfig />} />

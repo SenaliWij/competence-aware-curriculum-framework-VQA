@@ -13,38 +13,71 @@ import torch
 
 class ModelAdapter(ABC):
     """
-    Abstract Interface for VQA models.
+    This is an abstract base class that defines a common interface
+    for any VQA model used in the system.
     """
 
     @abstractmethod
     def train_step(self, batch: Dict[str, Any]) -> Dict[str, float]:
         """
-        Performs a single training step.
-        Returns dictionary of metrics (e.g., {'loss': 2.3})
+        Performs one training step on a batch of data.
+
+        - Runs forward pass
+        - Computes loss
+        - Performs backpropagation
+        - Updates model parameters
+
+        Returns:
+            A dictionary containing training metrics
+            Example: {'loss': 2.3}
         """
         pass
 
     @abstractmethod
     def validation_step(self, batch: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Performs a single validation step (no grad update).
-        Returns dictionary of outputs (e.g., {'logits': ..., 'labels': ...})
+        Performs one validation step (no parameter updates).
+
+        - Runs forward pass
+        - Computes loss
+        - Does NOT call backward()
+
+        Returns:
+            A dictionary containing outputs such as:
+            - logits
+            - labels
+            - validation loss
         """
         pass
 
     @abstractmethod
     def save(self, path: str):
+        """
+        Saves model weights to a file.
+        """
         pass
 
     @abstractmethod
     def load(self, path: str):
+        """
+        Loads model weights from a file.
+        """
         pass
 
     @abstractmethod
     def get_state_dict(self):
+        """
+        Returns the model's state dictionary.
+        Used for checkpointing.
+        """
         pass
 
     @abstractmethod
     def get_optimizer_state_dict(self):
+        """
+        Returns the optimizer state dictionary.
+        Needed to resume training from a checkpoint.
+        """
         pass
+
 

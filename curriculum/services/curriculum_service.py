@@ -7,25 +7,24 @@ Original file is located at
     https://colab.research.google.com/drive/1dXc9i2iTkFMad7bf4UlCjL-9Pzax49yR
 """
 
-from google.colab import drive
-drive.mount('/content/drive')
-
-from typing import Dict
-from evaluation_service import EvaluationService
-
 from typing import Dict, Any
-from evaluation_service import EvaluationService
+from services.evaluation_service import EvaluationService
 
 class CurriculumManager:
     """
-    Manages progression through CLEVR-based reasoning tiers with 
-    tier-specific performance thresholds and learning rates.
+    Controls progression through CLEVR reasoning tiers.
+
+    Responsibilities:
+    - Track current tier
+    - Check if model qualifies to advance
+    - Mark curriculum as completed
+
     """
     def __init__(
         self,
         max_tiers: int = 5,
         window_size: int = 5,
-        loss_stability_threshold: float = 1e-3
+        loss_stability_threshold: float = 5e-3
     ):
         self.max_tiers = max_tiers
         self.current_tier = 1
@@ -34,24 +33,21 @@ class CurriculumManager:
         self.is_completed = False
 
         # Tier-specific configurations
-        # Logic: Earlier tiers need higher accuracy to ensure a solid foundation.
-        # Later tiers are harder, so we lower the threshold slightly and reduce LR 
-        # to prevent catastrophic forgetting of simpler concepts.
         self.tier_configs = {
-            1: {"name": "Attribute & Existence", "threshold": 0.72, "lr": 1e-3},
-            2: {"name": "Counting / Compare Int", "threshold": 0.70, "lr": 8e-4},
-            3: {"name": "Compare Attribute",      "threshold": 0.68, "lr": 5e-4},
-            4: {"name": "Relational Tasks",       "threshold": 0.65, "lr": 2e-4},
-            5: {"name": "Complex Composition",    "threshold": 0.62, "lr": 1e-4}
+            1: {"name": "Attribute & Existence",  "threshold": 0.72 },
+            2: {"name": "Counting / Compare Int", "threshold": 0.70 },
+            3: {"name": "Compare Attribute",      "threshold": 0.68 },
+            4: {"name": "Relational Tasks",       "threshold": 0.65 },
+            5: {"name": "Complex Composition",    "threshold": 0.62 }
         }
-
-    def get_current_lr(self) -> float:
-        """Returns the learning rate intended for the current tier."""
-        return self.tier_configs[self.current_tier]["lr"]
 
     def should_advance(self, evaluation_service: EvaluationService) -> bool:
         """
-        Determines if the model should advance based on tier-specific thresholds.
+        Determines whether the model should move to the next tier.
+
+        Conditions:
+        1. Moving average accuracy >= tier threshold
+        2. Loss is stable
         """
         if self.is_completed:
             return False
@@ -73,18 +69,16 @@ class CurriculumManager:
         if self.current_tier < self.max_tiers:
             self.current_tier += 1
             new_config = self.tier_configs[self.current_tier]
-            print(f"\n🚀 PROMOTION! Moving to Tier {self.current_tier}: {new_config['name']}")
-            print(f"Adjusting Learning Rate to: {new_config['lr']}")
+            print(f"\nPromotion: Moving to Tier {self.current_tier}: {new_config['name']}")
         else:
             self.is_completed = True
-            print("\n🎉 Curriculum Completed! All tiers mastered.")
+            print("\nCurriculum completed. All tiers finished")
 
     def get_config_state(self) -> Dict[str, Any]:
         """Returns state for checkpointing."""
         return {
             'current_tier': self.current_tier,
-            'is_completed': self.is_completed,
-            'current_lr': self.get_current_lr()
+            'is_completed': self.is_completed
         }
 
     def load_config_state(self, state: Dict[str, Any]):

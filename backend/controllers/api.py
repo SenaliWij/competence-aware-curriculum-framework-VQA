@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, UploadFile, File
 from models.schemas import ModelConfig, VQAQuery, VQAResponse, TrainingStatus
 from services.training_service import training_service
@@ -23,5 +24,15 @@ async def predict(query: VQAQuery):
 
 @router.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    # In a real app, save the file. For prototype, we just acknowledge receipt.
-    return {"filename": file.filename, "message": "File uploaded successfully"}
+    upload_dir = "uploads"
+    os.makedirs(upload_dir, exist_ok=True)
+
+    file_path = os.path.join(upload_dir, file.filename)
+    print("file path", file_path)
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
+
+    return {
+        "filename": file.filename,
+        "image_path": file_path
+    }
