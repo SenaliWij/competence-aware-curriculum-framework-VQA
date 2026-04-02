@@ -15,7 +15,7 @@ const Home = () => {
     return (
         <div className="home-container">
 
-            {/* ================= HERO SECTION (NO IMAGE) ================= */}
+            {/* Home Page Introduction Section */}
             <Row justify="center">
                 <Col xs={24} md={18}>
                     <motion.div
@@ -49,7 +49,7 @@ const Home = () => {
                 </Col>
             </Row>
 
-            {/* ================= FLAT vs CURRICULUM SECTION ================= */}
+            {/*Flat vs Curriculum Section */}
             <Row className="home-section-margin" justify="center">
                 <Col xs={24}>
                     <Title
@@ -86,7 +86,7 @@ const Home = () => {
 
 
                             <Title level={3}>Flat Training</Title>
-                            <Paragraph className="text-secondary">
+                            <Paragraph className="text-secondary" style={{ fontSize: '1.15rem', lineHeight: '1.8' }}>
                                 Models are trained on all question types simultaneously, without any
                                 structured learning order. This often leads to shallow pattern matching
                                 and poor compositional reasoning.
@@ -114,7 +114,7 @@ const Home = () => {
                             </div>
 
                             <Title level={3}>Curriculum Learning</Title>
-                            <Paragraph className="text-secondary">
+                            <Paragraph className="text-secondary" style={{ fontSize: '1.15rem', lineHeight: '1.8' }}>
                                 Training progresses from simple concepts to complex reasoning steps.
                                 This structured approach enables robust compositional understanding
                                 and significantly improves VQA accuracy.
@@ -123,14 +123,13 @@ const Home = () => {
                     </motion.div>
                 </Col>
             </Row>
-
-            {/* ================= FEATURE CARDS (KEEPING YOUR ORIGINALS) ================= */}
+            #Feature cards
             <Row gutter={[32, 32]} className="mt-140">
                 <Col xs={24} md={8}>
                     <Card className="glass-panel" bordered={false} hoverable>
                         <ThunderboltOutlined className="feature-icon" style={{ color: '#00e5ff' }} />
                         <Title level={3}>Seamless Selection</Title>
-                        <Paragraph className="text-secondary">
+                        <Paragraph className="text-secondary" style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
                             Effortlessly browse and select from a curated list of leading VQA models like ViLT and LXMERT.
                         </Paragraph>
                     </Card>
@@ -140,7 +139,7 @@ const Home = () => {
                     <Card className="glass-panel" bordered={false} hoverable>
                         <RocketOutlined className="feature-icon" style={{ color: '#2979ff' }} />
                         <Title level={3}>Curriculum Learning</Title>
-                        <Paragraph className="text-secondary">
+                        <Paragraph className="text-secondary" style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
                             Guide models from simpler tasks to complex reasoning, dramatically enhancing accuracy.
                         </Paragraph>
                     </Card>
@@ -150,7 +149,7 @@ const Home = () => {
                     <Card className="glass-panel" bordered={false} hoverable>
                         <ExperimentOutlined className="feature-icon" style={{ color: '#d500f9' }} />
                         <Title level={3}>Interactive Testing</Title>
-                        <Paragraph className="text-secondary">
+                        <Paragraph className="text-secondary" style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
                             Test your trained models in real-time with our advanced visual playground.
                         </Paragraph>
                     </Card>

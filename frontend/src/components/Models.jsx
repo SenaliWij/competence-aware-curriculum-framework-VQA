@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Row, Col, Card, Typography, Button, Tag, Drawer, Alert, Space, Progress } from 'antd';
-import { LockOutlined, InfoCircleOutlined, DownloadOutlined, ExperimentOutlined, FileTextOutlined, ThunderboltOutlined, HddOutlined, CalendarOutlined, BranchesOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Typography, Button, Tag, Drawer, Space, notification } from 'antd';
+import { LockOutlined, InfoCircleOutlined, DownloadOutlined, ExperimentOutlined, FileTextOutlined, HddOutlined, CalendarOutlined, BranchesOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { getModelDownloadUrl } from '../services/api';
@@ -13,11 +13,11 @@ const { Title, Paragraph, Text } = Typography;
 
 const mockedModels = [
     {
-        id: 'vilt',
-        name: 'ViLT-Enhanced',
+        id: 'vilt_curriculum',
+        name: 'ViLT (Curriculum)',
         type: 'Transformer',
         version: 'v1.0',
-        description: 'Vision-and-Language Transformer optimized with curriculum learning.',
+        description: 'Vision-and-Language Transformer optimized with competence-aware curriculum learning.',
         locked: false,
         size: '1.3GB',
         date: '2024-03-15',
@@ -44,15 +44,26 @@ const mockedModels = [
     }
 ];
 
-const filters = ['All Architectures', 'Transformers', 'Dual-Stream'];
+
 
 const Models = () => {
     const navigate = useNavigate();
     const [selectedModel, setSelectedModel] = useState(null);
     const [drawerVisible, setDrawerVisible] = useState(false);
+    const [api, contextHolder] = notification.useNotification();
 
     const handleCardClick = (model) => {
-        if (!model.locked) {
+        // If the model is locked, show a quick "coming soon" message.
+        if (model.locked) {
+            api.warning({
+                message: 'Not Available Yet',
+                description: `${model.name} is coming soon. Stay tuned for updates!`,
+                placement: 'topRight',
+                duration: 3,
+                style: { background: '#0d1f2d', border: '1px solid rgba(0,229,255,0.3)', color: '#fff' },
+            });
+        } else {
+            // Open the drawer so users can download weights / jump to testing.
             setSelectedModel(model);
             setDrawerVisible(true);
         }
@@ -60,31 +71,16 @@ const Models = () => {
 
     return (
         <div className="page-container" style={{ padding: '40px 8%' }}>
+            {contextHolder}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <Title level={2} style={{ margin: 0, color: 'var(--text-primary)', fontWeight: 700, letterSpacing: '1px', border: '1px solid var(--glass-border)', display: 'inline-block', padding: '0px 8px' }}>
                     Model Repository
                 </Title>
-                <Paragraph className="text-secondary" style={{ fontSize: '1rem', marginTop: 10 }}>
+                <Paragraph className="text-secondary" style={{ fontSize: '1.2rem', marginTop: 10 }}>
                     Explore and configure curriculum-enhanced VQA architectures.
                 </Paragraph>
 
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', margin: '30px 0', flexWrap: 'wrap' }}>
-                    <Text className="text-secondary" style={{ marginRight: 10 }}>Filters:</Text>
-                    {filters.map((f, i) => (
-                        <div key={f} style={{
-                            padding: '6px 16px',
-                            background: i === 0 ? 'var(--primary-color)' : 'var(--card-bg)',
-                            color: i === 0 ? '#0B1118' : 'var(--text-secondary)',
-                            border: i === 0 ? 'none' : '1px solid rgba(0, 229, 255, 0.2)',
-                            borderRadius: '20px',
-                            cursor: 'pointer',
-                            fontSize: '0.9rem',
-                            fontWeight: i === 0 ? 600 : 400
-                        }}>
-                            {f}
-                        </div>
-                    ))}
-                </div>
+
 
                 <div style={{
                     background: 'rgba(0, 229, 255, 0.05)',
@@ -99,8 +95,8 @@ const Models = () => {
                             <Text style={{ color: 'var(--primary-color)', fontWeight: 600, fontSize: '1.1rem', display: 'block', marginBottom: '8px' }}>
                                 Note
                             </Text>
-                            <Paragraph className="text-secondary" style={{ margin: 0, fontSize: '0.95rem', lineHeight: '1.6' }}>
-                                Each model in this repository is a curriculum-enhanced variant of its baseline  to systematically improve compositional reasoning in VQA tasks. Download any enhanced model and benchmark it directly against its flat-trained baseline.
+                            <Paragraph className="text-secondary" style={{ margin: 0, fontSize: '1.05rem', lineHeight: '1.7' }}>
+                                Each model in this repository is a curriculum-enhanced variant of its baseline to systematically improve compositional reasoning in VQA tasks. Download any enhanced model and benchmark it directly against its flat-trained baseline.
                             </Paragraph>
                         </div>
                     </Space>
@@ -141,7 +137,7 @@ const Models = () => {
                                 <Title level={3} style={{ color: 'var(--text-primary)', marginBottom: '16px', letterSpacing: '0.5px' }}>
                                     {m.name}
                                 </Title>
-                                <Paragraph className="text-secondary" style={{ fontSize: '1rem', lineHeight: '1.5' }}>
+                                <Paragraph className="text-secondary" style={{ fontSize: '1.1rem', lineHeight: '1.7' }}>
                                     {m.description}
                                 </Paragraph>
 

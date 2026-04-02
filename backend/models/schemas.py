@@ -6,11 +6,6 @@ class ModelInfo(BaseModel):
     id: str
     name: str
     description: str
-    training_type: str          # "curriculum" or "baseline"
-    dataset: str
-    total_steps: int
-    tier_accuracies: Dict[str, float]
-    config: Dict[str, Any]
     available: bool
 
 
@@ -24,4 +19,4 @@ class VQAResponse(BaseModel):
     answer: str
     confidence: float
     candidate_answers: List[Dict[str, Any]]
-    reasoning_trace: List[str]
+

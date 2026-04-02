@@ -8,7 +8,7 @@ app = FastAPI(title="VQA-CL Backend", description="Backend for VQA Curriculum Le
 # Enable CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development, allow all
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

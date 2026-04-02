@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography, Card, Row, Col, Table, Tag, Space, Button, Divider } from 'antd';
-import { ArrowLeftOutlined, DownloadOutlined, RiseOutlined, CheckCircleOutlined, SecurityScanOutlined, FilePdfOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import archImg from '../assets/curriculum_arch.png';
@@ -15,11 +15,11 @@ const ModelDocs = () => {
     ];
 
     const tierData = [
-        { key: 'L1', tier: 'L1: Attribute & Existence', baseline: '73%', curriculum: '87%', delta: '+14%' },
-        { key: 'L2', tier: 'L2: Compare Attribute', baseline: '60%', curriculum: '93%', delta: '+33%' },
-        { key: 'L3', tier: 'L3: Counting / Compare Integer', baseline: '40%', curriculum: '53%', delta: '+13%' },
-        { key: 'L4', tier: 'L4: Relational', baseline: '80%', curriculum: '93%', delta: '+13%' },
-        { key: 'L5', tier: 'L5: Complex Composition', baseline: '33%', curriculum: '67%', delta: '+34%' },
+        { key: '1', tier: 'Tier 1', reasoning: 'Attribute & Existence',       accuracy: '91.23%' },
+        { key: '2', tier: 'Tier 2', reasoning: 'Compare Attribute',             accuracy: '97.01%' },
+        { key: '3', tier: 'Tier 3', reasoning: 'Counting / Compare Integer',    accuracy: '75.94%' },
+        { key: '4', tier: 'Tier 4', reasoning: 'Relational',                    accuracy: '85.16%' },
+        { key: '5', tier: 'Tier 5', reasoning: 'Complex Composition',           accuracy: '69.40%' },
     ];
 
     const columnStyle = { background: 'transparent', color: 'var(--text-secondary)' };
@@ -35,12 +35,9 @@ const ModelDocs = () => {
                             Back to Models
                         </Button>
                         <Title level={2} style={{ margin: 0, color: 'var(--text-primary)', fontWeight: 700, letterSpacing: '1px' }}>
-                            Model Documentation & Report
+                            Framework Documentation
                         </Title>
                     </div>
-                    <Button type="primary" icon={<FilePdfOutlined />} style={{ background: 'var(--primary-color)', color: '#0B1118', fontWeight: 600, border: 'none' }}>
-                        Export Report
-                    </Button>
                 </div>
 
                 <Row gutter={[32, 32]} style={{ marginBottom: 24 }}>
@@ -102,10 +99,9 @@ const ModelDocs = () => {
                                 pagination={false}
                                 className="dark-table"
                                 columns={[
-                                    { title: 'Difficulty Tier', dataIndex: 'tier', key: 'tier', align: 'left' },
-                                    { title: 'Baseline', dataIndex: 'baseline', key: 'baseline', align: 'center' },
-                                    { title: 'Curriculum (Ours)', dataIndex: 'curriculum', key: 'curriculum', align: 'center', render: t => <Text style={{ color: 'var(--primary-color)', fontWeight: 600 }}>{t}</Text> },
-                                    { title: 'Improvement', dataIndex: 'delta', key: 'delta', align: 'center', render: t => <Text style={{ color: '#52c41a', fontWeight: 600 }}>{t}</Text> },
+                                    { title: 'Tier', dataIndex: 'tier', key: 'tier', align: 'left' },
+                                    { title: 'Reasoning Type', dataIndex: 'reasoning', key: 'reasoning', align: 'left' },
+                                    { title: 'Accuracy', dataIndex: 'accuracy', key: 'accuracy', align: 'center', render: t => <Text style={{ color: 'var(--primary-color)', fontWeight: 700, fontSize: '1rem' }}>{t}</Text> },
                                 ]}
                             />
                         </Card>

@@ -8,19 +8,54 @@
   --glass-border: 1px solid rgba(0, 229, 255, 0.15);
   --text-primary: #ffffff;
   --text-secondary: #d1d9e0;
+  --link-color: #56a6ff;
+  --muted-blue: rgba(41, 121, 255, 0.18);
+}
+
+html {
+  font-size: 18px;
 }
 
 body {
-  margin: 0% 8%;
+  margin: 0% 4%;
   font-family: 'Outfit', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-primary);
   overflow-x: hidden;
+  line-height: 1.65;
+  text-rendering: optimizeLegibility;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
+}
+
+/* Global typography: make the "smallest text" bigger */
+p,
+li,
+label,
+small,
+.ant-typography,
+.ant-typography p,
+.ant-typography li {
+  font-size: 1.05rem;
+}
+
+.ant-typography-caption {
+  font-size: 1rem;
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+a {
+  color: var(--link-color);
+}
+
+a:hover {
+  color: var(--primary-color);
 }
 
 /* Custom Scrollbar */
@@ -74,13 +109,37 @@ body {
 }
 
 .ant-layout-header {
-  background: rgba(0, 0, 0, 0.8) !important;
+  background: linear-gradient(90deg, rgba(10, 17, 24, 0.9), rgba(13, 31, 45, 0.9)) !important;
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .ant-menu-dark {
   background: transparent !important;
+}
+
+/* Navigation font sizing + more blue */
+.ant-menu-dark .ant-menu-item,
+.ant-menu-dark .ant-menu-submenu-title {
+  font-size: 1.1rem !important;
+}
+
+.ant-menu-dark .ant-menu-item-selected {
+  background: var(--muted-blue) !important;
+}
+
+.ant-menu-dark .ant-menu-item-selected a,
+.ant-menu-dark .ant-menu-item-selected .ant-menu-title-content {
+  color: var(--primary-color) !important;
+}
+
+.ant-menu-dark .ant-menu-item a,
+.ant-menu-dark .ant-menu-title-content {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+.ant-menu-dark .ant-menu-item:hover {
+  background: rgba(41, 121, 255, 0.12) !important;
 }
 
 /* --- Refactored Styles --- */
@@ -329,4 +388,4 @@ body {
   background: #111 !important;
   border-color: #333 !important;
   color: #fff !important;
-}
+}

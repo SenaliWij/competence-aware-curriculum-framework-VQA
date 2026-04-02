@@ -4,9 +4,7 @@ const api = axios.create({
     baseURL: 'http://localhost:8000/api',
     headers: { 'Content-Type': 'application/json' },
 });
-
-// ── Models ───────────────────────────────────────────────────────────────────
-
+// Model APIs
 export const getModels = async () => {
     const res = await api.get('/models');
     return res.data;
@@ -20,12 +18,13 @@ export const getModel = async (modelId) => {
 export const getModelDownloadUrl = (modelId) =>
     `${api.defaults.baseURL}/models/${modelId}/download`;
 
-// ── Inference ────────────────────────────────────────────────────────────────
+// Inference APIs
 
 export const predictVQA = async (question, imageFile, modelId = 'vilt_curriculum') => {
     let imagePath = null;
 
     if (imageFile) {
+        // Upload first, then use the returned file path for inference.
         const formData = new FormData();
         formData.append('file', imageFile);
         const uploadRes = await api.post('/upload', formData, {
