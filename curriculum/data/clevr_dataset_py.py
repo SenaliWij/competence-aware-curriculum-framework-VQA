@@ -165,7 +165,7 @@ class CLEVRCurriculumViltDatasetS3(Dataset):
 
         # Encode using ViLTProcessor
         # This converts image + text into tensors
-        enc = self.processor(
+        encode = self.processor(
             images=image,
             text=s["question"],
             return_tensors="pt",
@@ -175,7 +175,7 @@ class CLEVRCurriculumViltDatasetS3(Dataset):
         )
 
         # Remove batch dimension (processor returns batch size 1)
-        item = {k: v.squeeze(0) for k, v in enc.items()}
+        item = {k: v.squeeze(0) for k, v in encode.items()}
 
         # If training/validation and answer mapping exists
         if s.get("answer") is not None and self.answer2id is not None:

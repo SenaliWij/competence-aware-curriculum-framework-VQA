@@ -1,28 +1,24 @@
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 
-class ModelConfig(BaseModel):
-    model_name: str
-    batch_size: int = 32
-    learning_rate: float = 0.001
-    use_curriculum: bool = True
 
-class TrainingMetrics(BaseModel):
-    global_step: int
-    loss: float
-    accuracy: float
-    current_tier: str
-    tier_progress: float  # 0.0 to 1.0
-    tier_accuracy: Dict[str, float]
+class ModelInfo(BaseModel):
+    id: str
+    name: str
+    description: str
+    training_type: str          # "curriculum" or "baseline"
+    dataset: str
+    total_steps: int
+    tier_accuracies: Dict[str, float]
+    config: Dict[str, Any]
+    available: bool
 
-class TrainingStatus(BaseModel):
-    is_training: bool
-    status_message: str
-    metrics: TrainingMetrics
 
 class VQAQuery(BaseModel):
     question: str
-    image_path: str 
+    image_path: str
+    model_id: Optional[str] = "vilt_curriculum"
+
 
 class VQAResponse(BaseModel):
     answer: str

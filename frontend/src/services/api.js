@@ -1,49 +1,43 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:8000/api', 
-    headers: {
-        'Content-Type': 'application/json',
-    },
+    baseURL: 'http://localhost:8000/api',
+    headers: { 'Content-Type': 'application/json' },
 });
 
-export const startTraining = async (config) => {
-    const response = await api.post('/training/start', config);
-    return response.data;
+// ── Models ───────────────────────────────────────────────────────────────────
+
+export const getModels = async () => {
+    const res = await api.get('/models');
+    return res.data;
 };
 
-export const stopTraining = async () => {
-    const response = await api.post('/training/stop');
-    return response.data;
+export const getModel = async (modelId) => {
+    const res = await api.get(`/models/${modelId}`);
+    return res.data;
 };
 
-export const getTrainingStatus = async () => {
-    const response = await api.get('/training/status');
-    return response.data;
-};
+export const getModelDownloadUrl = (modelId) =>
+    `${api.defaults.baseURL}/models/${modelId}/download`;
 
-export const predictVQA = async (question, imageFile) => {
+// ── Inference ────────────────────────────────────────────────────────────────
+
+export const predictVQA = async (question, imageFile, modelId = 'vilt_curriculum') => {
     let imagePath = null;
 
-    console.log(imageFile)
-    // Upload image
     if (imageFile) {
         const formData = new FormData();
         formData.append('file', imageFile);
-        console.log(formData)
-
         const uploadRes = await api.post('/upload', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+            headers: { 'Content-Type': 'multipart/form-data' },
         });
-        console.log(uploadRes)
-
         imagePath = uploadRes.data.image_path;
     }
 
-    // Call inference with image_path
     const inferenceRes = await api.post('/inference/predict', {
         question,
-        image_path: imagePath
+        image_path: imagePath,
+        model_id: modelId,
     });
 
     return inferenceRes.data;

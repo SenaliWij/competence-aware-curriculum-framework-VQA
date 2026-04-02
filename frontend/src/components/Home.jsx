@@ -38,7 +38,7 @@ const Home = () => {
                             <Button
                                 type="primary"
                                 size="large"
-                                onClick={() => navigate('/config')}
+                                onClick={() => navigate('/models')}
                                 className="neon-button"
                                 style={{ height: '50px', padding: '0 40px', fontSize: '1.1rem' }}
                             >

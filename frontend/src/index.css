@@ -3,11 +3,11 @@
 :root {
   --primary-color: #00e5ff;
   --secondary-color: #2979ff;
-  --bg-color: #050505;
-  --card-bg: rgba(20, 20, 20, 0.6);
-  --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+  --bg-color: #0A1118;
+  --card-bg: rgba(16, 28, 40, 0.65);
+  --glass-border: 1px solid rgba(0, 229, 255, 0.15);
   --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
+  --text-secondary: #d1d9e0;
 }
 
 body {
@@ -29,16 +29,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a1a;
+  background: #0A1118;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: #183142;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #254b66;
 }
 
 /* Glassmorphism Utilities */
@@ -248,28 +248,6 @@ body {
   margin: 20px 0;
 }
 
-/* Training Dashboard */
-.dashboard-header-panel {
-  padding: 60px;
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.chart-container-wrapper {
-  width: 250px;
-  height: 250px;
-  margin: 0 auto;
-  position: relative;
-}
-
-.chart-center-label {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-}
-
 /* VQA Playground */
 .playground-container {
   padding: 50px 80px;
@@ -315,11 +293,40 @@ body {
 .text-white {
   color: #fff;
 }
-.metrics-sidebar {
-  display: flex;
-  flex-direction: column;
-}
 
 .mb-24 {
   margin-bottom: 24px;
 }
+
+/* Ant Design dark-theme overrides */
+.ant-table {
+  background: transparent !important;
+}
+
+.ant-table-thead > tr > th {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #aaa !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.ant-descriptions-item-label {
+  color: #888 !important;
+}
+
+.ant-descriptions-item-content {
+  color: #fff !important;
+}
+
+.ant-select-selector {
+  background: #111 !important;
+  border-color: #333 !important;
+  color: #fff !important;
+}

@@ -8,10 +8,10 @@ from models.schemas import VQAQuery, VQAResponse
 
 
 # CONFIG
-S3_BUCKET = "clevr-dataset"
-S3_CHECKPOINT_KEY = "vqa_checkpoints/curriculum_run_v1/checkpoint_latest.pt"
-S3_VOCAB_KEY = "vqa_checkpoints/answer_vocab.json"
-LOCAL_MODEL_PATH = "vilt_models/checkpoint_tier2_best.pt"
+S3_BUCKET = "clevr-curriculum"
+S3_CHECKPOINT_KEY = "checkpoints/curriculum_run_4/checkpoint_best.pt"
+LOCAL_MODEL_PATH = "vilt_models/checkpoint_best.pt"
+LOCAL_VOCAB_PATH = r"C:\Users\Senal\Desktop\L6\FYP\competence-aware-curriculum-framework-VQA\backend\answer_vocab.json"
 
 # INFERENCE SERVICE
 
@@ -28,7 +28,7 @@ class InferenceService:
         )
 
         #  Load vocab from S3
-        self.id2label, self.label2id = self._load_answer_vocab_from_s3()
+        self.id2label, self.label2id = self._load_answer_vocab_local()
 
         # Load model from S3 checkpoint
         self.model = self._load_model()
@@ -45,15 +45,31 @@ class InferenceService:
         print("Checkpoint download complete")
 
     # LOAD ANSWER VOCAB FROM S3
-    def _load_answer_vocab_from_s3(self):
-        print(f"Loading answer vocab from s3://{S3_BUCKET}/{S3_VOCAB_KEY}")
+    # def _load_answer_vocab_from_s3(self):
+    #     print(f"Loading answer vocab from s3://{S3_BUCKET}/{S3_VOCAB_KEY}")
 
-        obj = self.s3.get_object(
-            Bucket=S3_BUCKET,
-            Key=S3_VOCAB_KEY
-        )
+    #     obj = self.s3.get_object(
+    #         Bucket=S3_BUCKET,
+    #         Key=S3_VOCAB_KEY
+    #     )
 
-        vocab = json.loads(obj["Body"].read().decode("utf-8"))
+    #     vocab = json.loads(obj["Body"].read().decode("utf-8"))
+
+    #     label2id = {k: int(v) for k, v in vocab.items()}
+    #     id2label = {int(v): k for k, v in vocab.items()}
+
+    #     print("Loaded answer vocab with", len(id2label), "labels")
+
+    #     return id2label, label2id
+
+    def _load_answer_vocab_local(self):
+        print(f"Loading answer vocab from {LOCAL_VOCAB_PATH}")
+
+        if not os.path.exists(LOCAL_VOCAB_PATH):
+            raise FileNotFoundError(f"Vocab file not found at {LOCAL_VOCAB_PATH}")
+
+        with open(LOCAL_VOCAB_PATH, "r", encoding="utf-8") as f:
+            vocab = json.load(f)
 
         label2id = {k: int(v) for k, v in vocab.items()}
         id2label = {int(v): k for k, v in vocab.items()}

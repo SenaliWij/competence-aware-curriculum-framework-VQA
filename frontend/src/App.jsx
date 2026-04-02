@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Layout, Menu, Button } from 'antd';
-import { HomeOutlined, SettingOutlined, BarChartOutlined, ExperimentOutlined } from '@ant-design/icons';
+import { Layout, Menu } from 'antd';
+import { HomeOutlined, AppstoreOutlined, FileTextOutlined, ExperimentOutlined } from '@ant-design/icons';
 import Home from './components/Home';
-import ModelConfig from './components/ModelConfig';
-import TrainingDashboard from './components/TrainingDashboard';
+import Models from './components/Models';
+import ModelDocs from './components/ModelDocs';
 import VQAPlayground from './components/VQAPlayground';
 
 const { Header, Content, Footer } = Layout;
@@ -13,9 +13,9 @@ const Navbar = () => {
 
     const items = [
         { key: '/', icon: <HomeOutlined />, label: <Link to="/">Home</Link> },
-        { key: '/config', icon: <SettingOutlined />, label: <Link to="/config">Model Config</Link> },
-        { key: '/training', icon: <BarChartOutlined />, label: <Link to="/training">Training</Link> },
-        { key: '/test', icon: <ExperimentOutlined />, label: <Link to="/test">VQA Test</Link> },
+        { key: '/models', icon: <AppstoreOutlined />, label: <Link to="/models">Models</Link> },
+        { key: '/docs', icon: <FileTextOutlined />, label: <Link to="/docs">Documentation</Link> },
+        { key: '/test', icon: <ExperimentOutlined />, label: <Link to="/test">VQA Playground</Link> },
     ];
 
     return (
@@ -39,11 +39,11 @@ function App() {
         <Router>
             <Layout style={{ minHeight: '100vh', background: 'transparent' }}>
                 <Navbar />
-                <Content style={{ padding: '0'}}>
+                <Content style={{ padding: '0' }}>
                     <Routes>
                         <Route path="/" element={<Home />} />
-                        <Route path="/config" element={<ModelConfig />} />
-                        <Route path="/training" element={<TrainingDashboard />} />
+                        <Route path="/models" element={<Models />} />
+                        <Route path="/docs" element={<ModelDocs />} />
                         <Route path="/test" element={<VQAPlayground />} />
                     </Routes>
                 </Content>
