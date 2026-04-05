@@ -1,21 +1,19 @@
-# =========================
+
 # Python / Notebooks
-# =========================
+
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .env
 .DS_Store
 
-# =========================
+
 # Colab / Drive junk
-# =========================
 content/
 *.log
 
-# =========================
+
 # Large ML files & data
-# =========================
 dataset/
 encode_output/
 checkpoints/
@@ -25,10 +23,7 @@ uploads/
 *.pth
 *.ckpt
 
-
-# =========================
 # Frontend (React / Vite / Next / Node)
-# =========================
 node_modules/
 dist/
 build/
@@ -41,9 +36,7 @@ frontend/.env.*
 .env.local
 .env.production
 
-# =========================
 # Backend (Python APIs)
-# =========================
 venv/
 .venv/
 
@@ -54,9 +47,7 @@ backend/.env.*
 # Databases
 *.sqlite3
 
-# =========================
 # Editors / OS
-# =========================
 .vscode/
 .idea/
 Thumbs.db

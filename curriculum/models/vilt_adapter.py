@@ -10,7 +10,7 @@ from typing import Dict, Any
 
 from models.base_model import ModelAdapter
 
-# Keys the ViLT model actually expects
+# Keys expected by the HuggingFace ViLT model forward pass 
 _VILT_INPUT_KEYS = (
     "input_ids",
     "attention_mask",
@@ -20,10 +20,9 @@ _VILT_INPUT_KEYS = (
     "labels",
 )
 
-
 class ViLTAdapter(ModelAdapter):
     """
-    Wraps HuggingFace ViLT to conform to the ModelAdapter interface.
+    Wraps HuggingFace ViLT to the ModelAdapter interface.
     """
 
     def __init__(
@@ -34,28 +33,30 @@ class ViLTAdapter(ModelAdapter):
         device: str = "cuda",
         freeze_backbone: bool = False,
     ):
+        # Setup computation device
         self.device = torch.device(device if torch.cuda.is_available() else "cpu")
 
+        # Initialize the VQA model
         self.model = ViltForQuestionAnswering.from_pretrained(
             model_name,
             num_labels=num_labels,
             ignore_mismatched_sizes=True,
         ).to(self.device)
 
+        # Freeze the backbone layers to only train the classification head
         if freeze_backbone:
             for param in self.model.vilt.parameters():
                 param.requires_grad = False
 
+        # Initialize the optimizer to only pass parameters that require gradients to the optimizer
         self.optimizer = torch.optim.AdamW(
             filter(lambda p: p.requires_grad, self.model.parameters()),
             lr=learning_rate,
         )
 
-    # ------------------------------------------------------------------
-    # Helpers
-    # ------------------------------------------------------------------
+    # Helpers functions
     def _to_device(self, batch: Dict[str, Any]) -> Dict[str, Any]:
-        """Move only ViLT-relevant tensors to the model device."""
+        """Filters the batch for ViLT-specific keys & moves tensors to the active device."""
         return {
             k: v.to(self.device)
             for k, v in batch.items()
@@ -63,7 +64,10 @@ class ViLTAdapter(ModelAdapter):
         }
 
     def _forward(self, inputs: Dict[str, Any]):
-        """Shared forward logic (returns logits, labels, loss)."""
+        """
+        Executes the model forward pass & computes CrossEntropy loss.
+        Returns: (logits, labels, loss)
+        """
         outputs = self.model(
             input_ids=inputs["input_ids"],
             attention_mask=inputs["attention_mask"],
@@ -76,11 +80,9 @@ class ViLTAdapter(ModelAdapter):
         loss = F.cross_entropy(logits, labels)
         return logits, labels, loss
 
-    # ------------------------------------------------------------------
-    # ModelAdapter interface
-    # ------------------------------------------------------------------
+    # Abstract methods implemented from ModelAdapter
     def forward_step(self, batch: Dict[str, Any]) -> Dict[str, Any]:
-        """Forward pass only — no backward, no optimiser step."""
+        """Forward pass only with  no backward, no optimiser step."""
         self.model.eval()
         with torch.no_grad():
             inputs = self._to_device(batch)
@@ -92,7 +94,17 @@ class ViLTAdapter(ModelAdapter):
         }
 
     def train_step(self, batch: Dict[str, Any]) -> Dict[str, float]:
-        """Full training step: forward → loss → backward → optimiser."""
+        """        
+        Execute a full  training step:
+          1. Forward pass to compute logits & loss.
+          2. Backward pass to compute gradients.
+          3. Optimiser step to update weights.
+
+        Parameters: Raw DataLoader batch.
+
+        Returns:
+            Dict with loss
+        """
         self.model.train()
         inputs = self._to_device(batch)
         logits, labels, loss = self._forward(inputs)
@@ -104,27 +116,10 @@ class ViLTAdapter(ModelAdapter):
         return {"loss": loss.item()}
 
     def validation_step(self, batch: Dict[str, Any]) -> Dict[str, Any]:
-        """Validation step — same as forward_step (kept for legacy compat)."""
+        """Validation step same as forward_step """
         return self.forward_step(batch)
 
-    def test_step(self, batch: Dict[str, Any]) -> Dict[str, Any]:
-        """Inference only — no loss computation, does not require labels."""
-        self.model.eval()
-        with torch.no_grad():
-            outputs = self.model(
-                input_ids=batch["input_ids"].to(self.device),
-                attention_mask=batch["attention_mask"].to(self.device),
-                pixel_values=batch["pixel_values"].to(self.device),
-            )
-        return {
-            "logits": outputs.logits.cpu(),
-            "preds": outputs.logits.argmax(dim=-1).cpu(),
-            "question_id": batch.get("question_id", torch.tensor(-1)).cpu()
-        }
-
-    # ------------------------------------------------------------------
     # Optimiser control
-    # ------------------------------------------------------------------
     def reset_optimizer(self, lr: float):
         """Re-initialise the optimiser with a new learning rate."""
         self.optimizer = torch.optim.AdamW(
@@ -132,9 +127,7 @@ class ViLTAdapter(ModelAdapter):
             lr=lr,
         )
 
-    # ------------------------------------------------------------------
     # Persistence / Checkpointing
-    # ------------------------------------------------------------------
     def save(self, path: str):
         torch.save(self.model.state_dict(), path)
 
