@@ -7,7 +7,7 @@ For each batch:
   3. Sample a tier.
   4. Use soft self-paced learning to pick samples within the tier.
   5. Train on the selected samples.
-  6. Periodically validate & checkpoint .
+  6. Periodically validate and checkpoint .
 
 """
 
@@ -87,7 +87,7 @@ class CurriculumTrainer:
         self.checkpoint = checkpoint_manager
 
         # Curriculum components
-         # Tracks EMA entropy & loss to derive a scalar competence score
+         # Tracks EMA entropy and loss to derive a scalar competence score
         self.tracker = CompetenceTracker(
             num_classes=num_classes,
             beta=beta,
@@ -106,7 +106,7 @@ class CurriculumTrainer:
             t: len(ds) for t, ds in tier_datasets.items()
         }
 
-        # Full per-step log, returned at the end of train() & checkpointed
+        # Full per-step log, returned at the end of train() and checkpointed
         self.history: List[Dict[str, Any]] = []
 
         # Accumulators reset every log_every steps for interval summaries
@@ -117,7 +117,7 @@ class CurriculumTrainer:
     # Resume from checkpoint
     def resume(self, tag: str = "latest") -> int:
         """
-        Attempt to load a checkpoint from S3 & restore all component
+        Attempt to load a checkpoint from S3 and restore all component
         states via the CheckpointManager.
 
         Returns
@@ -175,11 +175,11 @@ class CurriculumTrainer:
           1.  Compute current competence C.
           2.  Sample a tier using competence-driven power-law probabilities.
           3.  Select a batch within the tier using soft-SPL weights.
-          4.  Run a forward pass to measure entropy & loss.
+          4.  Run a forward pass to measure entropy and loss.
           5.  Update the EMA competence tracker.
           6.  Record per-sample losses for future SPL weighting.
           7.  Run the actual training step (backprop + optimiser).
-          8.  Log, validate, & checkpoint on their respective schedules.
+          8.  Log, validate, and checkpoint on their respective schedules.
 
         Parameters:
             start_step: Step to begin from.
@@ -231,7 +231,7 @@ class CurriculumTrainer:
             h_batch = batch_entropy(fwd["logits"])
             l_batch = fwd["loss"]
 
-            # 6) Update EMA tracker with fresh entropy & loss
+            # 6) Update EMA tracker with fresh entropy and loss
             self.tracker.update(h_batch, l_batch)
 
             # 7) Record per-sample losses for next SPL sampling round
@@ -304,11 +304,11 @@ class CurriculumTrainer:
 
             # 11) Periodic validation
             val_accuracy = 0.0
-            if step > 0 & step % self.val_every == 0:
+            if step > 0 and step % self.val_every == 0:
                 val_accuracy = self._validate(step)
 
             # 12) Periodic checkpoint to S3
-            if step > 0 & step % self.checkpoint_every == 0:
+            if step > 0 and step % self.checkpoint_every == 0:
                 self.checkpoint.save(
                     step=step,
                     model=self.model,
@@ -381,7 +381,7 @@ class CurriculumTrainer:
     # Validation
     def _validate(self, step: int) -> float:
         """
-        Run a full validation pass & log results, including per-tier accuracy.
+        Run a full validation pass and log results, including per-tier accuracy.
 
         Returns:
             Validation accuracy.
@@ -453,7 +453,7 @@ class CurriculumTrainer:
     # Per-tier validation
     def _validate_per_tier(self, step: int):
         """
-        Run validation separately for each tier & log per-tier accuracy.
+        Run validation separately for each tier and log per-tier accuracy.
         """
         if not self.tier_val_datasets:
             return
@@ -507,7 +507,7 @@ class CurriculumTrainer:
         self, batch: Dict[str, Any], tier: int, indices: List[int],
         step: int = 0,
     ):
-        """Compute per-sample CE loss & feed it to the SPL sampler."""
+        """Compute per-sample CE loss and feed it to the SPL sampler."""
         logits = self.model.forward_step(batch)["logits"]
         labels = batch["labels"]
 

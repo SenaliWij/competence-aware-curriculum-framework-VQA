@@ -1,6 +1,6 @@
 # tier_sampler.py
 """
-Converts a scalar competence score into a probability distribution over curriculum tiers & samples a tier for the next training batch.
+Converts a scalar competence score into a probability distribution over curriculum tiers and samples a tier for the next training batch.
 
 Uses a power-law mapping:  S[k] = C ^ difficulty[k]
 then normalises to get probabilities P[k] = S[k] / sum_j S[j].

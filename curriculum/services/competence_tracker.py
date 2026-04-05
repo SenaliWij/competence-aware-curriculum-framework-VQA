@@ -1,5 +1,5 @@
 """
-Tracks the model's evolving competence using exponential moving averages of prediction entropy (H) & training loss (L).
+Tracks the model's evolving competence using exponential moving averages of prediction entropy (H) and training loss (L).
 
 Computes a single competence score C hat captures how well the model currently "understands" the data.
 """
@@ -8,7 +8,7 @@ import math
 
 class CompetenceTracker:
     """
-    Maintains EMA-smoothed entropy & loss signals & derives
+    Maintains EMA-smoothed entropy and loss signals and derives
     a scalar competence score that drives curriculum tier selection.
     """
 
@@ -47,7 +47,7 @@ class CompetenceTracker:
     # Core update
     def update(self, h_batch: float, l_batch: float) -> None:
         """
-        Update the running EMA estimates with a new batch's entropy & loss.
+        Update the running EMA estimates with a new batch's entropy and loss.
 
         Parameters
             h_batch : float
@@ -78,7 +78,7 @@ class CompetenceTracker:
         l_ema = self.l_ema
 
         # Apply EMA bias correction for early steps (like Adam's bias correction)
-        if self.step_count > 0 & self.step_count <= self.bias_correction_steps:
+        if self.step_count > 0 and self.step_count <= self.bias_correction_steps:
             correction = 1.0 - (self.beta ** self.step_count)
             h_ema = self.h_ema / correction
             l_ema = self.l_ema / correction

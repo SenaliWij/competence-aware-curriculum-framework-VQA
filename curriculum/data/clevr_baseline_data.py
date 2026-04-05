@@ -22,16 +22,16 @@ class S3Client:
         self.client = boto3.client("s3")
 
     def load_json(self, key: str) -> Any:
-        """Download a JSON file from S3 & return it as a Python dict."""
+        """Download a JSON file from S3 and return it as a Python dict."""
         obj = self.client.get_object(Bucket=self.bucket, Key=key)
         return json.loads(obj["Body"].read().decode("utf-8"))
 
     def load_image(self, key: str):
-        """Download an image from S3 & return it as a PIL Image."""
+        """Download an image from S3 and return it as a PIL Image."""
         obj = self.client.get_object(Bucket=self.bucket, Key=key)
         return Image.open(io.BytesIO(obj["Body"].read())).convert("RGB")
 
-# Baseline traning Dataset class that loads image + question & encodes using ViLT
+# Baseline traning Dataset class that loads image + question and encodes using ViLT
 class CLEVRBaselineDatasetS3(Dataset):
     """
     PyTorch Dataset for CLEVR VQA using baseline training (no tiers here).
@@ -72,7 +72,7 @@ class CLEVRBaselineDatasetS3(Dataset):
                 "question_index": q.get("question_index", -1),
             })
             
-        if max_samples is not None & max_samples < len(self.samples):
+        if max_samples is not None and max_samples < len(self.samples):
             self.samples = self.samples[:max_samples]
             print(f"Truncated dataset to {max_samples} samples.")
 
@@ -104,7 +104,7 @@ class CLEVRBaselineDatasetS3(Dataset):
         )
 
         item = {k: v.squeeze(0) for k, v in encode.items()}
-        if sample.get("answer") is not None & self.answer2id is not None:
+        if sample.get("answer") is not None and self.answer2id is not None:
             key = str(sample["answer"]).strip().lower()
             item["labels"] = torch.tensor(self.answer2id[key], dtype=torch.long)
         item["question_id"] = torch.tensor(sample["question_index"], dtype=torch.long)

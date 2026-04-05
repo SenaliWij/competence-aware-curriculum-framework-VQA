@@ -24,7 +24,7 @@ class SoftSelfPacedSampler:
         lambda_max : float
             Maximum temperature (when competence is high).
         max_loss_age : int
-            Losses older than this many steps are treated as stale & ignored.
+            Losses older than this many steps are treated as stale and ignored.
     """
 
     def __init__(

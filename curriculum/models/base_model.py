@@ -2,7 +2,7 @@
 """
 Abstract base class (adapter pattern) for any VQA model.
 
-The curriculum Training Stratergy never touches model internals directly
+The curriculum training stratergy never touches model internals directly
 """
 from abc import ABC, abstractmethod
 from typing import Dict, Any
@@ -35,7 +35,7 @@ class ModelAdapter(ABC):
         One full training iteration (forward -> loss -> backward -> step).
         
         Parameters: batch (Dict) containing training data.
-        Returns: Dict with 'logits', 'labels', & 'loss'.
+        Returns: Dict with 'logits', 'labels', and 'loss'.
         """
         pass
 
@@ -45,8 +45,8 @@ class ModelAdapter(ABC):
         """
         Forward pass with no gradient computation.
 
-        Parameters: batch (Dict) containing inputs & ground-truth labels.
-        Returns: Dict with 'logits', 'labels', & 'loss'.
+        Parameters: batch (Dict) containing inputs and ground-truth labels.
+        Returns: Dict with 'logits', 'labels', and 'loss'.
         """
         pass
 
@@ -74,7 +74,7 @@ class ModelAdapter(ABC):
     @abstractmethod
     def load_optimizer_state(self, state_dict: Dict):
         """
-        Restores the optimizer configuration & state.
+        Restores the optimizer configuration and state.
         
         Parameters: state_dict (Dict) containing optimizer parameters.
         Returns: None.

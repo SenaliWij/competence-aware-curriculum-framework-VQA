@@ -25,12 +25,12 @@ class S3Client:
         self.client = boto3.client("s3")
 
     def load_json(self, key: str) -> Any:
-        """Download a JSON file from S3 & return it as a Python dict."""
+        """Download a JSON file from S3 and return it as a Python dict."""
         obj = self.client.get_object(Bucket=self.bucket, Key=key)
         return json.loads(obj["Body"].read().decode("utf-8"))
 
     def load_image(self, key: str) -> Image.Image:
-        """Download an image from S3 & return it as a PIL Image."""
+        """Download an image from S3 and return it as a PIL Image."""
         obj = self.client.get_object(Bucket=self.bucket, Key=key)
         return Image.open(io.BytesIO(obj["Body"].read())).convert("RGB")
 
@@ -55,7 +55,7 @@ def build_answer_vocab_s3(
     return {a: i for i, a in enumerate(answers)}
 
 
-# Dataset class that loads image + question & encodes using ViLT
+# Dataset class that loads image + question and encodes using ViLT
 class CLEVRCurriculumViltDatasetS3(Dataset):
     """
     PyTorch Dataset for CLEVR VQA using curriculum tiers.
@@ -93,7 +93,7 @@ class CLEVRCurriculumViltDatasetS3(Dataset):
         self.samples: List[Dict[str, Any]] = []
 
         # Load questions from S3
-        if split in {"train", "val"} & tiers is not None:
+        if split in {"train", "val"} and tiers is not None:
             for t in tiers:
                 # Construct S3 key for tier-specific question file
                 qkey = f"{questions_prefix}/CLEVR_{split}_questions_L{t}.json"
@@ -162,11 +162,11 @@ class CLEVRCurriculumViltDatasetS3(Dataset):
         item = {k: v.squeeze(0) for k, v in encode.items()}
 
         # Convert the answer string to a number so the model can learn from it
-        if sample.get("answer") is not None & self.answer2id is not None:
+        if sample.get("answer") is not None and self.answer2id is not None:
             key = str(sample["answer"]).strip().lower()
             item["labels"] = torch.tensor(self.answer2id[key], dtype=torch.long)
 
-        # Also store the tier & question ID so it can be tracked later
+        # Also store the tier and question ID so it can be tracked later
         item["tier"] = torch.tensor(sample["tier"], dtype=torch.long)
         item["question_id"] = torch.tensor(sample["question_index"], dtype=torch.long)
         return item

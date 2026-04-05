@@ -56,7 +56,7 @@ class ViLTAdapter(ModelAdapter):
 
     # Helpers functions
     def _to_device(self, batch: Dict[str, Any]) -> Dict[str, Any]:
-        """Filters the batch for ViLT-specific keys & moves tensors to the active device."""
+        """Filters the batch for ViLT-specific keys and moves tensors to the active device."""
         return {
             k: v.to(self.device)
             for k, v in batch.items()
@@ -65,7 +65,7 @@ class ViLTAdapter(ModelAdapter):
 
     def _forward(self, inputs: Dict[str, Any]):
         """
-        Executes the model forward pass & computes CrossEntropy loss.
+        Executes the model forward pass and computes CrossEntropy loss.
         Returns: (logits, labels, loss)
         """
         outputs = self.model(
@@ -96,7 +96,7 @@ class ViLTAdapter(ModelAdapter):
     def train_step(self, batch: Dict[str, Any]) -> Dict[str, float]:
         """        
         Execute a full  training step:
-          1. Forward pass to compute logits & loss.
+          1. Forward pass to compute logits and loss.
           2. Backward pass to compute gradients.
           3. Optimiser step to update weights.
 

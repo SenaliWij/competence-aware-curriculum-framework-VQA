@@ -1,6 +1,6 @@
 # checkpoint_service.py
 """
-Centralised S3 checkpoint manager for the curriculum Training Stratergy.
+Centralised S3 checkpoint manager for the curriculum training stratergy.
 
 Saves three checkpoint slots to S3:
     checkpoint_latest.pt   - overwritten every save
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class CheckpointManager:
     """
-    Handles serialisation & AWS S3 uploads/downloads for all components.
+    Handles serialisation and AWS S3 uploads/downloads for all components.
     """
 
     def __init__(
@@ -42,14 +42,14 @@ class CheckpointManager:
         return f"{self.prefix}/{self.run_name}/{name}"
 
     def _upload(self, state: Dict, key: str) -> None:
-        """Serialise a state dict & upload to S3."""
+        """Serialise a state dict and upload to S3."""
         buffer = io.BytesIO()
         torch.save(state, buffer)
         buffer.seek(0)
         self.s3.put_object(Bucket=self.bucket, Key=key, Body=buffer)
 
     def _download(self, key: str) -> Optional[Dict]:
-        """Download & deserialise a state dict from S3"""
+        """Download and deserialise a state dict from S3"""
         try:
             obj = self.s3.get_object(Bucket=self.bucket, Key=key)
             buffer = io.BytesIO(obj["Body"].read())
@@ -237,7 +237,7 @@ class CheckpointManager:
         tag: str = "latest",
     ) -> Optional[int]:
         """
-        Download a baseline checkpoint from S3 & restore model state.
+        Download a baseline checkpoint from S3 and restore model state.
 
         Parameters
             model: ModelAdapter whose weights will be restored.
@@ -257,7 +257,7 @@ class CheckpointManager:
         logger.info("Loaded baseline checkpoint from s3://%s/%s", self.bucket, key)
 
         model.load(state["model_state_dict"])
-        if hasattr(model, "load_optimizer_state") & "optimizer_state_dict" in state:
+        if hasattr(model, "load_optimizer_state") and "optimizer_state_dict" in state:
             model.load_optimizer_state(state["optimizer_state_dict"])
 
         self.best_accuracy = state.get("best_accuracy", 0.0)
@@ -279,7 +279,7 @@ class CheckpointManager:
         tag: str = "latest",
     ) -> Optional[int]:
         """
-        Download a checkpoint from S3 & restore all component states.
+        Download a checkpoint from S3 and restore all component states.
         
         Parameters:
             model: ModelAdapter whose weights will be restored.
@@ -289,7 +289,7 @@ class CheckpointManager:
             tag: Which slot to load - latest or best.
 
         Returns:
-            Tuple of (step, history) - the training step & metrics log at
+            Tuple of (step, history) - the training step and metrics log at
             the time of saving.
         """
         filename = f"checkpoint_{tag}.pt"
@@ -304,7 +304,7 @@ class CheckpointManager:
 
         # Model
         model.load(state["model_state_dict"])
-        if hasattr(model, "load_optimizer_state") & "optimizer_state_dict" in state:
+        if hasattr(model, "load_optimizer_state") and "optimizer_state_dict" in state:
             model.load_optimizer_state(state["optimizer_state_dict"])
 
         # Competence tracker

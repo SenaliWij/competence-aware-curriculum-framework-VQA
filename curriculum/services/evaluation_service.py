@@ -5,7 +5,7 @@ from typing import List, Dict
 
 class EvaluationService:
     """
-    Computes & aggregates metrics to assess model competence.
+    Computes and aggregates metrics to assess model competence.
     """
     def __init__(self, history_window: int = 5):
         self.history_window = history_window
