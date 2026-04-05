@@ -1,66 +1,148 @@
-import { useState, useEffect } from 'react';
-import { Row, Col, Input, Button, Card, Typography, Upload, Progress, List, Tag, Select, Alert } from 'antd';
-import { InboxOutlined, SendOutlined, LockOutlined, WarningOutlined } from '@ant-design/icons';
-import { useSearchParams } from 'react-router-dom';
-import { predictVQA, getModels } from '../services/api';
+import { useState } from 'react';
+import { Row, Col, Input, Button, Card, Typography, Upload, Progress, List, Tag, Alert } from 'antd';
+import { InboxOutlined, SendOutlined, SwapOutlined, WarningOutlined } from '@ant-design/icons';
+import { predictVQA, compareVQA } from '../services/api';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 const { Dragger } = Upload;
 
-// Model IDs that the backend actually supports for inference.
-const AVAILABLE_MODEL_IDS = ['vilt_curriculum', 'vilt_baseline'];
+// Reusable result card
+const ModelResultCard = ({ data, accentColor, label }) => {
+    if (!data) return null;
+
+    return (
+        <Card
+            className="glass-panel"
+            style={{ height: '100%', borderTop: `3px solid ${accentColor}` }}
+        >
+            {/* Header */}
+            <div style={{ marginBottom: 16 }}>
+                <Text style={{
+                    fontSize: '1rem', fontWeight: 600,
+                    color: 'var(--text-secondary)',
+                    textTransform: 'uppercase', letterSpacing: '0.5px',
+                }}>
+                    {label}
+                </Text>
+                <Title level={4} style={{ margin: '4px 0 0', fontSize: '1.15rem', color: accentColor }}>
+                    ({data.model_name})
+                </Title>
+            </div>
+
+            {/* Answer */}
+            <div style={{ marginBottom: 16 }}>
+                <Text style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>Answer:</Text>
+                <Title level={2} style={{ color: '#fff', margin: '4px 0 0', fontSize: '2rem', fontWeight: 700 }}>
+                    {data.answer}.
+                </Title>
+            </div>
+
+            {/* Confidence */}
+            <Text style={{ fontSize: '1.05rem', color: 'var(--text-secondary)' }}>
+                Confidence: <span style={{ color: '#fff', fontWeight: 600 }}>
+                    {Math.round(data.confidence * 100)}%
+                </span>
+            </Text>
+
+            {/* Model tag and  progress bar */}
+            <div style={{ margin: '14px 0 20px' }}>
+                <Tag style={{
+                    fontSize: '0.85rem', padding: '3px 12px',
+                    background: `${accentColor}22`, border: `1px solid ${accentColor}55`,
+                    color: accentColor, borderRadius: 6,
+                }}>
+                    {data.model_name}
+                </Tag>
+                <Progress
+                    percent={Math.round(data.confidence * 100)}
+                    showInfo={false}
+                    strokeColor={accentColor}
+                    trailColor="rgba(255,255,255,0.07)"
+                    style={{ marginTop: 10 }}
+                />
+            </div>
+
+            {/* Candidate answers */}
+            <List
+                dataSource={data.candidate_answers}
+                renderItem={item => (
+                    <List.Item style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '10px 0' }}>
+                        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
+                            <Text style={{ fontSize: '1.05rem', fontWeight: 500 }}>{item.text}</Text>
+                            <Text style={{ fontSize: '1rem', color: accentColor, fontWeight: 600, marginLeft: 16 }}>
+                                ({Math.round(item.confidence * 100)}%)
+                            </Text>
+                        </div>
+                    </List.Item>
+                )}
+            />
+        </Card>
+    );
+};
 
 const VQAPlayground = () => {
-    const [searchParams] = useSearchParams();
-    const [selectedModel, setSelectedModel] = useState(searchParams.get('model') || 'vilt_curriculum');
-    const [models, setModels] = useState([]);
     const [question, setQuestion] = useState('');
     const [image, setImage] = useState(null);
-    const [result, setResult] = useState(null);
-    const [loading, setLoading] = useState(false);
     const [preview, setPreview] = useState('');
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        getModels().then(setModels).catch(console.error);
-    }, []);
+    // Get Answer
+    const [singleResult, setSingleResult] = useState(null);
+    // Compare
+    const [compareResult, setCompareResult] = useState(null);
 
-    // If the backend returns other models (future work), we treat them as locked here.
-    const isLockedModel = (modelId) => !AVAILABLE_MODEL_IDS.includes(modelId);
+    const [loadingPredict, setLoadingPredict] = useState(false);
+    const [loadingCompare, setLoadingCompare] = useState(false);
 
-    const handlePredict = async () => {
+    //Shared validation for image and question check
+    const validate = (action) => {
         setError('');
-
-        // Locked model guard
-        if (isLockedModel(selectedModel)) {
-            setError('This model is not available yet. Please select an available model.');
-            return;
-        }
-
-        // Validation: require both image and question
         if (!image && !question.trim()) {
-            setError('Please upload an image and enter a question before running inference.');
-            return;
+            setError(`Please upload an image & enter a question before ${action}.`);
+            return false;
         }
         if (!image) {
-            setError('Please upload an image before running inference.');
-            return;
+            setError(`Please upload an image before ${action}.`);
+            return false;
         }
         if (!question.trim()) {
-            setError('Please enter a question before running inference.');
-            return;
+            setError(`Please enter a question before ${action}.`);
+            return false;
         }
+        return true;
+    };
 
-        setLoading(true);
+    /*Get Answer (proposed model only)*/
+    const handlePredict = async () => {
+        if (!validate('running inference')) return;
+
+        setLoadingPredict(true);
+        setCompareResult(null); // clear compare view
         try {
-            const res = await predictVQA(question, image, selectedModel);
-            setResult(res);
+            const res = await predictVQA(question, image);
+            setSingleResult(res);
         } catch (err) {
             console.error(err);
-            setError('Inference failed. Make sure the backend is running and try again.');
+            setError('Inference failed. Make sure the backend is running & try again.');
         }
-        setLoading(false);
+        setLoadingPredict(false);
+    };
+
+    //Compare proposed vs baseline
+    const handleCompare = async () => {
+        if (!validate('comparing')) return;
+
+        setLoadingCompare(true);
+        setSingleResult(null); // clear single view
+        try {
+            const res = await compareVQA(question, image);
+            setCompareResult(res);
+        } catch (err) {
+            console.error(err);
+            setError('Comparison failed. Make sure the backend is running & try again.');
+        }
+        setLoadingCompare(false);
     };
 
     const handleUpload = ({ file }) => {
@@ -70,7 +152,7 @@ const VQAPlayground = () => {
         return false;
     };
 
-    const locked = isLockedModel(selectedModel);
+    const isLoading = loadingPredict || loadingCompare;
 
     return (
         <div style={{ padding: '40px 4%', minHeight: '100vh' }}>
@@ -78,45 +160,11 @@ const VQAPlayground = () => {
                 VQA Testing <span className="text-accent">Interface</span>
             </Title>
             <Paragraph className="text-secondary" style={{ fontSize: '1.15rem', marginBottom: 30 }}>
-                Select a model, upload an image, ask a question, and see the answer.
+                Upload an image, ask a question and get an answer or compare both models side by side.
             </Paragraph>
 
-            {/* Model selector */}
-            <div style={{ marginBottom: 24 }}>
-                <Text style={{ display: 'block', marginBottom: 10, fontSize: '1.05rem', color: 'var(--text-secondary)' }}>
-                    Active Model
-                </Text>
-                <Select
-                    value={selectedModel}
-                    onChange={(val) => { setSelectedModel(val); setResult(null); setError(''); }}
-                    style={{ width: 360, fontSize: '1.05rem' }}
-                    options={models.map(m => ({ value: m.id, label: m.name }))}
-                    dropdownStyle={{ background: '#0d1f2d', color: '#fff' }}
-                />
-            </div>
-
-            {/* Locked model warning */}
-            {locked && (
-                <Alert
-                    message={
-                        <span style={{ fontSize: '1.05rem', fontWeight: 600 }}>
-                            <LockOutlined style={{ marginRight: 8 }} />
-                            Not Available Yet
-                        </span>
-                    }
-                    description={
-                        <span style={{ fontSize: '1rem' }}>
-                            The selected model is not yet available for inference. Please select a different model.
-                        </span>
-                    }
-                    type="warning"
-                    showIcon={false}
-                    style={{ marginBottom: 24, background: 'rgba(255, 170, 0, 0.08)', border: '1px solid rgba(255,170,0,0.3)', borderRadius: 8 }}
-                />
-            )}
-
             {/* Validation / API error */}
-            {error && !locked && (
+            {error && (
                 <Alert
                     message={
                         <span style={{ fontSize: '1rem' }}>
@@ -127,13 +175,18 @@ const VQAPlayground = () => {
                     type="error"
                     closable
                     onClose={() => setError('')}
-                    style={{ marginBottom: 24, background: 'rgba(255, 50, 50, 0.08)', border: '1px solid rgba(255,50,50,0.3)', borderRadius: 8 }}
+                    style={{
+                        marginBottom: 24,
+                        background: 'rgba(255, 50, 50, 0.08)',
+                        border: '1px solid rgba(255,50,50,0.3)',
+                        borderRadius: 8,
+                    }}
                 />
             )}
 
             <Row gutter={[28, 28]}>
-                {/* Left: Input panel */}
-                <Col xs={24} lg={12}>
+                {/* Input panel */}
+                <Col xs={24} lg={10}>
                     <Card className="glass-panel" style={{ height: '100%' }}>
                         <Title level={4} style={{ fontSize: '1.25rem', marginBottom: 16 }}>
                             <InboxOutlined style={{ marginRight: 8 }} />
@@ -144,13 +197,12 @@ const VQAPlayground = () => {
                             beforeUpload={() => false}
                             onChange={handleUpload}
                             showUploadList={false}
-                            disabled={locked}
                         >
                             {preview ? (
                                 <img
                                     src={preview}
                                     alt="preview"
-                                    style={{ maxHeight: '260px', maxWidth: '100%', borderRadius: '8px' }}
+                                    style={{ maxHeight: '220px', maxWidth: '100%', borderRadius: '8px' }}
                                 />
                             ) : (
                                 <div style={{ padding: '32px 20px' }}>
@@ -161,8 +213,10 @@ const VQAPlayground = () => {
                             )}
                         </Dragger>
 
-                        <div style={{ marginTop: 32 }}>
-                            <Title level={4} style={{ fontSize: '1.25rem', marginBottom: 12 }}>Your Question</Title>
+                        <div style={{ marginTop: 28 }}>
+                            <Title level={4} style={{ fontSize: '1.25rem', marginBottom: 12 }}>
+                                Your Question
+                            </Title>
                             <TextArea
                                 rows={4}
                                 style={{ fontSize: '1.05rem', lineHeight: '1.6' }}
@@ -170,80 +224,94 @@ const VQAPlayground = () => {
                                 onChange={e => { setQuestion(e.target.value); setError(''); }}
                                 placeholder="e.g., Is the cat sitting on a striped rug?"
                                 className="input-dark"
-                                disabled={locked}
                             />
+
+                            {/*Action buttons*/}
                             <Button
                                 type="primary"
                                 className="neon-button"
                                 icon={<SendOutlined />}
                                 onClick={handlePredict}
-                                loading={loading}
-                                disabled={locked}
-                                style={{ marginTop: 16, width: '100%', height: 48, fontSize: '1.1rem' }}
+                                loading={loadingPredict}
+                                disabled={loadingCompare}
+                                style={{
+                                    marginTop: 16, width: '100%',
+                                    height: 48, fontSize: '1.1rem', fontWeight: 600,
+                                }}
                             >
-                                Get Answer
+                                {loadingPredict ? 'Getting Answer…' : 'Get Answer'}
+                            </Button>
+
+                            <Button
+                                icon={<SwapOutlined />}
+                                onClick={handleCompare}
+                                loading={loadingCompare}
+                                disabled={loadingPredict}
+                                style={{
+                                    marginTop: 10, width: '100%',
+                                    height: 44, fontSize: '1rem', fontWeight: 500,
+                                    background: 'transparent',
+                                    border: '1px solid rgba(255,152,0,0.5)',
+                                    color: '#ff9800',
+                                }}
+                            >
+                                {loadingCompare ? 'Comparing…' : 'Compare with Baseline'}
                             </Button>
                         </div>
                     </Card>
                 </Col>
 
-                {/* Right: Output panel */}
-                <Col xs={24} lg={12}>
-                    {result && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                            <Card className="glass-panel">
-                                <Title level={4} style={{ fontSize: '1.25rem', marginBottom: 12 }}>Model Answer</Title>
-                                <Title level={2} style={{ color: '#00e5ff', margin: '10px 0', fontSize: '2rem' }}>
-                                    {result.answer}.
-                                </Title>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
-                                    <Text style={{ fontSize: '1.1rem' }}>
-                                        Confidence: {Math.round(result.confidence * 100)}%
-                                    </Text>
-                                    <Tag color="cyan" style={{ fontSize: '0.95rem', padding: '3px 10px' }}>
-                                        {models.find(m => m.id === selectedModel)?.name || selectedModel}
-                                    </Tag>
-                                </div>
-                            </Card>
+                {/* Results panel */}
+                <Col xs={24} lg={14}>
 
-                            <Card className="glass-panel">
-                                <Title level={4} style={{ fontSize: '1.25rem', marginBottom: 16 }}>Candidate Answers</Title>
-                                <List
-                                    dataSource={result.candidate_answers}
-                                    renderItem={item => (
-                                        <List.Item style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: 12 }}>
-                                            <div style={{ width: '100%' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                                    <Text style={{ fontSize: '1.1rem', fontWeight: 500 }}>{item.text}</Text>
-                                                    <Text style={{ fontSize: '1.05rem', color: 'var(--primary-color)', marginLeft: 16 }}>
-                                                        {Math.round(item.confidence * 100)}%
-                                                    </Text>
-                                                </div>
-                                                <Progress
-                                                    percent={Math.round(item.confidence * 100)}
-                                                    showInfo={false}
-                                                    strokeColor="#00e5ff"
-                                                    trailColor="rgba(255,255,255,0.07)"
-                                                />
-                                            </div>
-                                        </List.Item>
-                                    )}
-                                />
-                            </Card>
-                        </div>
+                    {/* Single-model result */}
+                    {singleResult && (
+                        <ModelResultCard
+                            data={{
+                                model_name: 'VILT-CL',
+                                answer: singleResult.answer,
+                                confidence: singleResult.confidence,
+                                candidate_answers: singleResult.candidate_answers,
+                            }}
+                            accentColor="#00e5ff"
+                            label="Proposed Model"
+                        />
                     )}
-                    {!result && (
+
+                    {/* side by side comparison */}
+                    {compareResult && (
+                        <Row gutter={[20, 20]}>
+                            <Col xs={24} md={12}>
+                                <ModelResultCard
+                                    data={compareResult.proposed}
+                                    accentColor="#00e5ff"
+                                    label="Proposed Model"
+                                />
+                            </Col>
+                            <Col xs={24} md={12}>
+                                <ModelResultCard
+                                    data={compareResult.baseline}
+                                    accentColor="#ff9800"
+                                    label="Baseline Model"
+                                />
+                            </Col>
+                        </Row>
+                    )}
+
+                    {/* Placeholder when no results yet */}
+                    {!singleResult && !compareResult && (
                         <div style={{
-                            height: '100%',
-                            minHeight: 340,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            border: '1px dashed rgba(255,255,255,0.12)',
-                            borderRadius: 12,
+                            height: '100%', minHeight: 400,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            border: '1px dashed rgba(255,255,255,0.12)', borderRadius: 12,
+                            flexDirection: 'column', gap: 12,
                         }}>
-                            <Text style={{ color: '#555', fontSize: '1.05rem' }}>
+                            <SendOutlined style={{ fontSize: 36, color: '#333' }} />
+                            <Text style={{ color: '#555', fontSize: '1.1rem' }}>
                                 Model output will appear here
+                            </Text>
+                            <Text style={{ color: '#444', fontSize: '0.95rem' }}>
+                                Use "Get Answer" or "Compare with Baseline"
                             </Text>
                         </div>
                     )}

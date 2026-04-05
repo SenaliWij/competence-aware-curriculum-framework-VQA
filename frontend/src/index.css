@@ -13,7 +13,7 @@
 }
 
 html {
-  font-size: 18px;
+  font-size: 17px;
 }
 
 body {
@@ -31,7 +31,6 @@ body {
   min-height: 100vh;
 }
 
-/* Global typography: make the "smallest text" bigger */
 p,
 li,
 label,
@@ -76,7 +75,7 @@ a:hover {
   background: #254b66;
 }
 
-/* Glassmorphism Utilities */
+/* Glassmorphism */
 .glass-panel {
   background: var(--card-bg);
   backdrop-filter: blur(12px);
@@ -102,7 +101,7 @@ a:hover {
   transform: translateY(-2px);
 }
 
-/* Ant Design Overrides for Dark/Cyber theme */
+/* Ant Design Overrides */
 .ant-btn-primary {
   background: linear-gradient(90deg, var(--secondary-color), var(--primary-color)) !important;
   border: none !important;
@@ -118,7 +117,6 @@ a:hover {
   background: transparent !important;
 }
 
-/* Navigation font sizing + more blue */
 .ant-menu-dark .ant-menu-item,
 .ant-menu-dark .ant-menu-submenu-title {
   font-size: 1.1rem !important;
@@ -142,9 +140,7 @@ a:hover {
   background: rgba(41, 121, 255, 0.12) !important;
 }
 
-/* --- Refactored Styles --- */
-
-/* App Layout & Utilities */
+/* Layout */
 .page-container {
   padding: 50px 80px;
   min-height: 100vh;
@@ -152,12 +148,6 @@ a:hover {
 
 .home-container {
   padding: 70px 80px;
-}
-
-.dashboard-container {
-  padding: 60px;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
 /* Flex Utilities */
@@ -173,26 +163,16 @@ a:hover {
   gap: 20px;
 }
 
-.flex-between-center {
-  /* display: flex; */
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Typography Utilities */
+/* Typography */
 .text-center {
   text-align: center;
-}
-
-.text-secondary {
-  color: var(--text-secondary);
 }
 
 .text-accent {
   color: var(--primary-color) !important;
 }
 
-/* Spacing Utilities */
+/* Spacing */
 .mb-20 {
   margin-bottom: 20px !important;
 }
@@ -262,68 +242,11 @@ a:hover {
   margin-bottom: 20px;
 }
 
-/* Model Config Page */
-.model-card-wrapper {
-  height: 100%;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.model-card-active {
-  border: 2px solid var(--primary-color) !important;
-}
-
-.model-card-inactive {
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-.model-color-header {
-  height: 120px;
-  position: relative;
-}
-
-.model-check-icon {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 24px;
-  color: var(--primary-color);
-}
-
-.config-form-panel {
-  padding: 40px;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.review-panel {
-  padding: 40px;
-  text-align: center;
-}
-
-.review-model-text {
-  display: block;
-  font-size: 1.2rem;
-  margin: 20px 0;
-}
-
 /* VQA Playground */
-.playground-container {
-  padding: 50px 80px;
-}
-
 .upload-dragger {
   background: transparent !important;
   border: 1px dashed #444 !important;
   margin-top: 20px !important;
-}
-
-.upload-placeholder-wrapper {
-  padding: 40px;
-}
-
-.upload-placeholder-text {
-  color: var(--text-secondary);
 }
 
 .input-dark {
@@ -332,60 +255,21 @@ a:hover {
   color: #fff !important;
 }
 
-.empty-result-placeholder {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed #333;
-  border-radius: 12px;
-}
-
-.w-full {
-  width: 100%;
-}
-
-.h-full {
-  height: 100%;
-}
-
-.text-white {
-  color: #fff;
-}
-
-.mb-24 {
-  margin-bottom: 24px;
-}
-
-/* Ant Design dark-theme overrides */
+/* Ant Design dark-theme table overrides */
 .ant-table {
   background: transparent !important;
 }
 
-.ant-table-thead > tr > th {
+.ant-table-thead>tr>th {
   background: rgba(255, 255, 255, 0.05) !important;
   color: #aaa !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-.ant-table-tbody > tr > td {
+.ant-table-tbody>tr>td {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
-.ant-table-tbody > tr:hover > td {
+.ant-table-tbody>tr:hover>td {
   background: rgba(255, 255, 255, 0.03) !important;
-}
-
-.ant-descriptions-item-label {
-  color: #888 !important;
-}
-
-.ant-descriptions-item-content {
-  color: #fff !important;
-}
-
-.ant-select-selector {
-  background: #111 !important;
-  border-color: #333 !important;
-  color: #fff !important;
 }

@@ -19,6 +19,12 @@ content/
 dataset/
 encode_output/
 checkpoints/
+vilt_models/
+uploads/
+*.pt
+*.pth
+*.ckpt
+
 
 # =========================
 # Frontend (React / Vite / Next / Node)

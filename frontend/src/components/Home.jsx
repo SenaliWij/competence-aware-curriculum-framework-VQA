@@ -1,11 +1,8 @@
 import { Button, Typography, Row, Col, Card } from 'antd';
-import { RocketOutlined, ThunderboltOutlined, ExperimentOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import flatTrainingImg from "../assets/flat_training.jpg";
-import curriculumLearningImg from "../assets/curriculum_training.jpg";
-
-
+import flatTrainingImg from '../assets/flat_training.jpg';
+import curriculumLearningImg from '../assets/curriculum_training.jpg';
 
 const { Title, Paragraph } = Typography;
 
@@ -15,7 +12,7 @@ const Home = () => {
     return (
         <div className="home-container">
 
-            {/* Home Page Introduction Section */}
+            {/* Hero Section */}
             <Row justify="center">
                 <Col xs={24} md={18}>
                     <motion.div
@@ -25,13 +22,13 @@ const Home = () => {
                         className="text-center"
                     >
                         <Title level={1} className="home-hero-title">
-                            VQA-CL: Redefining <br />
-                            <span className="gradient-text">Visual Reasoning</span>
+                            DyCDC: Curriculum Learning <br />
+                            <span className="gradient-text">for Visual Reasoning</span>
                         </Title>
 
                         <Paragraph className="home-hero-text">
-                            Empower your VQA models to understand the world with compositional reasoning,
-                            overcoming complex visual challenges through structured curriculum learning.
+                            Enhance your VQA models with a curriculum-based training strategy to improve compositional reasoning.
+                            By moving beyond flat training, DyCDC empowers transformer-based VQA models to master compositional logic through structured learning.
                         </Paragraph>
 
                         <div className="flex-center-gap">
@@ -42,31 +39,26 @@ const Home = () => {
                                 className="neon-button"
                                 style={{ height: '50px', padding: '0 40px', fontSize: '1.1rem' }}
                             >
-                                Explore Framework
+                                See how it works
                             </Button>
                         </div>
                     </motion.div>
                 </Col>
             </Row>
 
-            {/*Flat vs Curriculum Section */}
+            {/* Flat vs Curriculum Section */}
             <Row className="home-section-margin" justify="center">
                 <Col xs={24}>
-                    <Title
-                        level={2}
-                        className="text-center mb-20"
-                    >
+                    <Title level={2} className="text-center" style={{ marginBottom: 8 }}>
                         Flat Training vs Curriculum Learning
                     </Title>
-
                     <Paragraph className="home-section-text">
-                        Why structured learning leads to smarter, more reliable visual reasoning models.
+                        Why curriculum learning leads to smarter, more reliable visual reasoning models.
                     </Paragraph>
                 </Col>
             </Row>
 
             <Row gutter={[48, 48]}>
-                {/* Flat Training */}
                 <Col xs={24} md={12}>
                     <motion.div
                         initial={{ opacity: 0, x: -40 }}
@@ -75,27 +67,17 @@ const Home = () => {
                         viewport={{ once: true }}
                     >
                         <Card className="glass-panel" bordered={false}>
-                            {/* Image Placeholder */}
                             <div className="home-image-container">
-                                <img
-                                    src={flatTrainingImg}
-                                    alt="Flat Training"
-                                    className="img-cover"
-                                />
+                                <img src={flatTrainingImg} alt="Flat Training" className="img-cover" />
                             </div>
-
-
                             <Title level={3}>Flat Training</Title>
                             <Paragraph className="text-secondary" style={{ fontSize: '1.15rem', lineHeight: '1.8' }}>
-                                Models are trained on all question types simultaneously, without any
-                                structured learning order. This often leads to shallow pattern matching
-                                and poor compositional reasoning.
+                                A training approach where the model is exposed to all samples and difficulty levels simultaneously, in no particular order.
                             </Paragraph>
                         </Card>
                     </motion.div>
                 </Col>
 
-                {/* Curriculum Learning */}
                 <Col xs={24} md={12}>
                     <motion.div
                         initial={{ opacity: 0, x: 40 }}
@@ -104,53 +86,49 @@ const Home = () => {
                         viewport={{ once: true }}
                     >
                         <Card className="glass-panel" bordered={false}>
-                            {/* Image Placeholder */}
                             <div className="home-image-container">
-                                <img
-                                    src={curriculumLearningImg}
-                                    alt="Curriculum Learning"
-                                    className="img-cover"
-                                />
+                                <img src={curriculumLearningImg} alt="Curriculum Learning" className="img-cover" />
                             </div>
-
                             <Title level={3}>Curriculum Learning</Title>
                             <Paragraph className="text-secondary" style={{ fontSize: '1.15rem', lineHeight: '1.8' }}>
-                                Training progresses from simple concepts to complex reasoning steps.
-                                This structured approach enables robust compositional understanding
-                                and significantly improves VQA accuracy.
+                                A training approach where training samples are ordered by difficulty, starting simple and progressively introducing harder concepts as the model improves.
                             </Paragraph>
                         </Card>
                     </motion.div>
                 </Col>
             </Row>
-            #Feature cards
-            <Row gutter={[32, 32]} className="mt-140">
+
+            {/* How to Start Section */}
+            <Row justify="center" className="mt-140 mb-40">
+                <Col xs={24}>
+                    <Title level={2} className="text-center">How to start?</Title>
+                </Col>
+            </Row>
+
+            <Row gutter={[32, 32]}>
                 <Col xs={24} md={8}>
                     <Card className="glass-panel" bordered={false} hoverable>
-                        <ThunderboltOutlined className="feature-icon" style={{ color: '#00e5ff' }} />
-                        <Title level={3}>Seamless Selection</Title>
+                        <Title level={3}>1. Select & Download</Title>
                         <Paragraph className="text-secondary" style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
-                            Effortlessly browse and select from a curated list of leading VQA models like ViLT and LXMERT.
+                            Browse curriculum-trained model variants. Download whichever model that fits your pipeline.
                         </Paragraph>
                     </Card>
                 </Col>
 
                 <Col xs={24} md={8}>
                     <Card className="glass-panel" bordered={false} hoverable>
-                        <RocketOutlined className="feature-icon" style={{ color: '#2979ff' }} />
-                        <Title level={3}>Curriculum Learning</Title>
+                        <Title level={3}>2. Understand the Training Strategy</Title>
                         <Paragraph className="text-secondary" style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
-                            Guide models from simpler tasks to complex reasoning, dramatically enhancing accuracy.
+                            Dig into the training strategy, compositional metrics, and architecture decisions behind every model in the repository.
                         </Paragraph>
                     </Card>
                 </Col>
 
                 <Col xs={24} md={8}>
                     <Card className="glass-panel" bordered={false} hoverable>
-                        <ExperimentOutlined className="feature-icon" style={{ color: '#d500f9' }} />
-                        <Title level={3}>Interactive Testing</Title>
+                        <Title level={3}>3. Test & Compare</Title>
                         <Paragraph className="text-secondary" style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
-                            Test your trained models in real-time with our advanced visual playground.
+                            Upload an image, ask a question, and see both models answer side by side. See exactly where curriculum training pulls ahead.
                         </Paragraph>
                     </Card>
                 </Col>

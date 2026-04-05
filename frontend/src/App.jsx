@@ -21,7 +21,7 @@ const Navbar = () => {
     return (
         <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 50px' }}>
             <div className="logo" style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 'bold', marginRight: '40px' }}>
-                <span style={{ color: '#00e5ff' }}>VQA-CL</span> Framework
+                <span style={{ color: '#00e5ff' }}>DyCDC</span> Training Strategy
             </div>
             <Menu
                 theme="dark"
@@ -48,7 +48,7 @@ function App() {
                     </Routes>
                 </Content>
                 <Footer style={{ textAlign: 'center', background: 'transparent', color: '#666' }}>
-                    © 2026 VQA-CL Framework. All rights reserved.
+                    2026 DyCDC Training Strategy. All rights reserved.
                 </Footer>
             </Layout>
         </Router>

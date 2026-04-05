@@ -5,10 +5,6 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { getModelDownloadUrl } from '../services/api';
 
-import viltImg from '../assets/vilt.png';
-import lxmertImg from '../assets/lxmert.png';
-import oscarImg from '../assets/oscar.png';
-
 const { Title, Paragraph, Text } = Typography;
 
 const mockedModels = [
@@ -17,12 +13,11 @@ const mockedModels = [
         name: 'ViLT (Curriculum)',
         type: 'Transformer',
         version: 'v1.0',
-        description: 'Vision-and-Language Transformer optimized with competence-aware curriculum learning.',
+        description: 'Vision-&-Language Transformer optimized with competence-aware curriculum learning.',
         locked: false,
         size: '1.3GB',
         date: '2024-03-15',
         accuracy: 82,
-        image: viltImg,
     },
     {
         id: 'lxmert',
@@ -31,7 +26,6 @@ const mockedModels = [
         version: 'v1.0',
         description: 'Cross-modality contextualized representations adapted via dynamic pacing.',
         locked: true,
-        image: lxmertImg,
     },
     {
         id: 'oscar',
@@ -40,11 +34,8 @@ const mockedModels = [
         version: 'v1.0',
         description: 'Object-semantics aligned pre-training augmented with concept progression.',
         locked: true,
-        image: oscarImg,
     }
 ];
-
-
 
 const Models = () => {
     const navigate = useNavigate();
@@ -53,7 +44,7 @@ const Models = () => {
     const [api, contextHolder] = notification.useNotification();
 
     const handleCardClick = (model) => {
-        // If the model is locked, show a quick "coming soon" message.
+        // If the model is locked, show a quick coming soon message.
         if (model.locked) {
             api.warning({
                 message: 'Not Available Yet',
@@ -63,7 +54,7 @@ const Models = () => {
                 style: { background: '#0d1f2d', border: '1px solid rgba(0,229,255,0.3)', color: '#fff' },
             });
         } else {
-            // Open the drawer so users can download weights / jump to testing.
+            // rawer so users can download weights / jump to testing.
             setSelectedModel(model);
             setDrawerVisible(true);
         }
@@ -77,11 +68,9 @@ const Models = () => {
                     Model Repository
                 </Title>
                 <Paragraph className="text-secondary" style={{ fontSize: '1.2rem', marginTop: 10 }}>
-                    Explore and configure curriculum-enhanced VQA architectures.
+                    Explore & configure curriculum-enhanced VQA architectures.
                 </Paragraph>
-
-
-
+                {/* Note */}
                 <div style={{
                     background: 'rgba(0, 229, 255, 0.05)',
                     border: '1px solid rgba(0, 229, 255, 0.2)',
@@ -96,13 +85,13 @@ const Models = () => {
                                 Note
                             </Text>
                             <Paragraph className="text-secondary" style={{ margin: 0, fontSize: '1.05rem', lineHeight: '1.7' }}>
-                                Each model in this repository is a curriculum-enhanced variant of its baseline to systematically improve compositional reasoning in VQA tasks. Download any enhanced model and benchmark it directly against its flat-trained baseline.
+                                Each model in this repository is a curriculum-enhanced variant of its baseline to systematically improve compositional reasoning in VQA tasks. Download any enhanced model & benchmark it directly against its flat-trained baseline.
                             </Paragraph>
                         </div>
                     </Space>
                 </div>
             </motion.div>
-
+            {/* Models */}
             <Row gutter={[24, 24]}>
                 {mockedModels.map((m, i) => (
                     <Col xs={24} sm={12} lg={8} key={m.id}>
@@ -112,19 +101,18 @@ const Models = () => {
                                 bordered={false}
                                 hoverable={!m.locked}
                                 onClick={() => handleCardClick(m)}
-                                cover={
-                                    <div style={{ height: '140px', overflow: 'hidden', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
-                                        <img alt={m.name} src={m.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    </div>
-                                }
                                 style={{
-                                    height: '380px',
-                                    background: 'var(--card-bg)',
-                                    border: 'var(--glass-border)',
+                                    minHeight: '260px',
+                                    background: m.locked 
+                                        ? 'linear-gradient(145deg, #0f182b 0%, #121f36 100%)' 
+                                        : 'linear-gradient(145deg, #14223d 0%, #1d325a 100%)',
+                                    border: '1px solid rgba(0, 229, 255, 0.1)',
+                                    borderTop: m.locked ? '2px solid rgba(255,255,255,0.08)' : '2px solid #00e5ff',
                                     cursor: m.locked ? 'not-allowed' : 'pointer',
                                     position: 'relative',
-                                    opacity: m.locked ? 0.6 : 1,
-                                    boxShadow: m.locked ? 'none' : '0 4px 12px rgba(0, 229, 255, 0.05)'
+                                    paddingTop: '32px',
+                                    opacity: m.locked ? 0.7 : 1,
+                                    boxShadow: m.locked ? 'none' : '0 8px 32px rgba(0, 229, 255, 0.1)'
                                 }}
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -152,7 +140,7 @@ const Models = () => {
                     </Col>
                 ))}
             </Row>
-
+            {/* Drawer for model details */}
             <Drawer
                 title={null}
                 placement="right"
