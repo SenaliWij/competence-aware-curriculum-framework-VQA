@@ -60,3 +60,7 @@ Once the dataset is prepared, you can train your models.
 |------------|-----------------|
 | Baseline   | 71.33%          |
 | DyCDC      | 82.65%          |
+
+---
+
+*Note: AI was used to assist with the competence power law and Self-Paced Learning (SPL) calculations from a mathematical perspective.*
