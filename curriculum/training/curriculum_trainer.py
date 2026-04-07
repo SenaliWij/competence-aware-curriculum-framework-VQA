@@ -206,7 +206,7 @@ class CurriculumTrainer:
             # Track tier selection frequency
             self._tier_selection_counts[tier] += 1
 
-            # 3) Within-tier SPL sampling
+            # 3) Within-tier Soft Self Paced Learning sampling
             spl_lambda = self.spl_sampler._temperature(competence)
             indices = self.spl_sampler.sample_indices(
                 tier=tier,

@@ -1,6 +1,6 @@
-# DyCDC — Competence-Aware Curriculum Framework for VQA
+# DyCDC - Competence-Aware Curriculum Framework for VQA
 
-A curriculum learning framework that trains ViLT-based VQA models on the CLEVR dataset using a dynamic competence-driven training strategy (DyCDC), with an interactive web interface for inference and model comparison.
+DyCDC (Dynamic Competence-Driven Curriculum) is an advanced curriculum learning framework designed to train Vision-and-Language Transformer (ViLT) models for Visual Question Answering (VQA). Unlike traditional training methods that present data randomly, DyCDC dynamically adapts the training data complexity based on the model's continuously assessed competence levels. Evaluated on the CLEVR dataset, this approach significantly accelerates convergence and improves reasoning capabilities. The project also features a modern, interactive React-based web interface and a FastAPI backend, enabling users to seamlessly perform model inference, visualize results, and compare the DyCDC model's performance directly against a standard baseline model.
 
 ---
 
@@ -12,7 +12,7 @@ cd frontend
 npm install
 npm run dev
 ```
-Runs at **http://localhost:5173** — requires the backend to be running.
+Runs at **http://localhost:3000** — requires the backend to be running.
 
 ---
 
@@ -35,13 +35,15 @@ vilt_models/
 
 ### Curriculum Training (Google Colab / SageMaker)
 
-Run these steps in order:
+To train the models from scratch, follow these data preparation steps first in order:
 
-1. **Download CLEVR dataset** — `utils/clevr_downloader.ipynb`
-2. **Split into tiers L1–L5** — `utils/tier_division_clevr.ipynb`
-3. **Downsample tiers** — `utils/downsampling_clevr.ipynb`
-4. **Train curriculum model** — `trainer_sagemaker.ipynb`
-5. **Train baseline model** — `baseline_trainer_sagemaker.ipynb`
+1. **Download CLEVR dataset** — Run `utils/clevr_downloader.ipynb`
+2. **Split into tiers L1–L5** — Run `utils/tier_division_clevr.ipynb`
+3. **Downsample tiers** — Run `utils/downsampling_clevr.ipynb`
+
+Once the dataset is prepared, you can train your models. 
+- **For Curriculum Training (DyCDC):** Please run the `trainer_sagemaker.ipynb` notebook.
+- **For Baseline Training:** Please run the `baseline_trainer_sagemaker.ipynb` notebook.
 
 ---
 

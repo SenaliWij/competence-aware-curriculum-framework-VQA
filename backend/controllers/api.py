@@ -3,20 +3,14 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from models.schemas import VQAQuery, VQAResponse, VQACompareQuery, VQACompareResponse
 from services.inference_service import inference_service
+from services.model_service import model_service
 
 router = APIRouter()
 
 # Download an enhanced VQA model checkpoint by model ID
 @router.get("/models/{model_id}/download")
 async def download_model(model_id: str):
-    checkpoint_paths = {
-        "vilt_curriculum": "vilt_models/checkpoint_best.pt",
-        "vilt_baseline":   "vilt_models/baseline_best.pt",
-    }
-    
-    path = checkpoint_paths.get(model_id)
-    if not path or not os.path.exists(path):
-        raise HTTPException(status_code=404, detail="Checkpoint not available")
+    path = model_service.get_model_download_path(model_id)
 
     return FileResponse(
         path=path,

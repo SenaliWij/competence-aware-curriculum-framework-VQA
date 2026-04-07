@@ -22,8 +22,6 @@ class TierSampler:
 
     Parameters:
         difficulty : dict[int, float] | None
-            Maps tier id -> difficulty exponent.
-            If None, uses DEFAULT_DIFFICULTY.
     """
 
     def __init__(self, difficulty: Optional[Dict[int, float]] = None):
@@ -64,7 +62,8 @@ class TierSampler:
         tiers = list(probs.keys())
         weights = [probs[t] for t in tiers]
 
-        # Weighted random selection: Tiers with higher probabilities are more likely to be selected for the next training batch.
+        # Weighted random selection: Tiers with higher probabilities are more 
+        # likely to be selected for the next training batch.
         return random.choices(tiers, weights=weights, k=1)[0]
 
     def get_tier_ids(self) -> List[int]:
