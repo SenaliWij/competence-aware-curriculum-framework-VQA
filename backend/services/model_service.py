@@ -5,7 +5,7 @@ class ModelService:
     def __init__(self):
         self.checkpoint_paths = {
             "vilt_curriculum": "vilt_models/checkpoint_best.pt",
-            "vilt_baseline":   "vilt_models/baseline_best.pt",
+            "vilt_baseline": "vilt_models/baseline_best.pt",
         }
 
     def get_model_download_path(self, model_id: str) -> str:

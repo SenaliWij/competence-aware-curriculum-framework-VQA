@@ -23,12 +23,12 @@ TOP_K_ANSWERS = 3 # number of top candidate answers
 
 MODEL_CHECKPOINT_PATHS: dict[str, str] = {
     "vilt_curriculum": os.path.join("vilt_models", "checkpoint_best.pt"),
-    "vilt_baseline":   os.path.join("vilt_models", "baseline_best.pt"),
+    "vilt_baseline": os.path.join("vilt_models", "baseline_best.pt"),
 }
 
 MODEL_DISPLAY_NAMES: dict[str, str] = {
     "vilt_curriculum": "VILT-CL",
-    "vilt_baseline":   "VILT-Baseline",
+    "vilt_baseline": "VILT-Baseline",
 }
 
 VOCAB_PATH = os.path.abspath(
