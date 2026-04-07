@@ -24,8 +24,6 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 Runs at **http://localhost:8000**
 
-```
-
 ---
 
 ### Curriculum Training (Google Colab / SageMaker)
