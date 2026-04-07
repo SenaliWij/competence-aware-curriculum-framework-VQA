@@ -24,11 +24,6 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 Runs at **http://localhost:8000**
 
-Place model checkpoints in `backend/vilt_models/`:
-```
-vilt_models/
-├── checkpoint_best.pt   # Curriculum model
-└── baseline_best.pt     # Baseline model
 ```
 
 ---
